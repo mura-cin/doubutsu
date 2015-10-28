@@ -75,6 +75,20 @@ class Board():
                 elif k[0] == 'l':
                     self.capturedPiece2.append(koma.Lion(2))
 
+    def __str__(self):
+        line = ""
+        for i in range(12):
+            if self.board[i] is None:
+                line += "--"
+                continue
+            line += str(self.board[i])
+        for x in self.capturedPiece1:
+            line += str(x)
+        for x in self.capturedPiece2:
+            line += str(x)
+
+        return line
+
     # 動ける場所のインデックスのリストを返す
     def movablePlace(self, src):
         ret = []

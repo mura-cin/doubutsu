@@ -9,13 +9,11 @@ import ban
 memo = {}
 
 def minimax(player, board, depth):
-    if board in memo:
-        print("hoge~~~~~~~")
-        return memo[board]
+    if str(board) in memo:
+        return memo[str(board)]
     
     if depth == 0:
-       memo[board] = board.calcBoard()
-       return memo[board]
+        return board.calcBoard()
     
     if board.calcBoard() > 1500: return 9999
     if board.calcBoard() < -1500: return -9999
@@ -24,6 +22,10 @@ def minimax(player, board, depth):
     if board.turn == player: # 自分の手番
         if player == 1: val = -5000
         if player == 2: val =  5000
+
+        if board.isTried(player):
+            if player == 1: return 9999
+            else: return -9999
         
         for i in range(12):
             if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -38,6 +40,7 @@ def minimax(player, board, depth):
 
                 if player == 1: val = max(val, score) # 評価値が大きくなるように
                 if player == 2: val = min(val, score) # 評価値が小さくなるように
+
         """
         if player == 1:
             for i, p in enumerate(board.capturedPiece1):
@@ -103,10 +106,12 @@ def minimax(player, board, depth):
                     val = max(val, score)
         """
 
+
         return val
 
 
 def first_search(player, board):
+    global memo
     ret_board = None
     board.turn = player%2 + 1  # first_searchで一回動かしてからminimaxに投げるので1->2 or 2->1にする
     val = 0
@@ -125,7 +130,11 @@ def first_search(player, board):
         for x in ret:
             bd = copy.deepcopy(board)
             bd.move(i, x)
+
             s_result = minimax(player, bd, 4) # とりあえず深さ2で探索する
+            bd.turn = bd.turn%2 + 1
+            memo[str(bd)] = s_result
+
             print("評価値: " + str(s_result))
             bd.showBoard()
 
@@ -148,7 +157,11 @@ def first_search(player, board):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+                
                 s_result = minimax(player, bd, 4)
+                bd.turn = bd.turn%2 + 1
+                memo[str(bd)] = s_result
+                
                 print("評価値:" + str(s_result))
                 bd.showBoard()
                 if s_result > val:
@@ -159,7 +172,12 @@ def first_search(player, board):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+
+                
                 s_result = minimax(player, bd, 4)
+                bd.turn = bd.turn%2 + 1
+                memo[str(bd)] = s_result
+                
                 print("評価値:" + str(s_result))
                 bd.showBoard()
                 if s_result < val:
@@ -177,7 +195,7 @@ def isMatchBoard(b1, b2):
 BUFSIZE = 1024
 
 serverName = "localhost"
-#serverName = "10.2.77.149"
+#serverName = "10.2.77.191"
 serverPort = 4444
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -209,6 +227,7 @@ while True:
     time.sleep(0.1)
     ret = s.recv(BUFSIZE).rstrip().decode()
     board = ban.Board(ret)
+    board.turn = player
 
     board.showBoard()
 
