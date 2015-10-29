@@ -192,9 +192,9 @@ class Board():
                     value -= len(self.movablePlace(i))*2
 
         for x in self.capturedPiece1:
-            value += x.retValue()*2
+            value += x.retValue()
         for x in self.capturedPiece2:
-            value -= x.retValue()*2
+            value -= x.retValue()
                 
         return value
                     

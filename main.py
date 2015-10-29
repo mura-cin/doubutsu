@@ -17,49 +17,114 @@ def alpha_beta(player, board, depth, alpha, beta):
     if val < -1000: return -5000
     if depth == 0: return val
 
-    if board.turn == player:    # 自分の手番
-        if board.isTried(board.turn):
-            if board.turn == 1: return 5000
-            else: return -5000
+
+    # 先手の時
+    if player == 1:
+        if board.turn == player:    # 自分の手番
+            if board.isTried(board.turn): return 5000
             
-        for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
+            for i in range(12):
+                if board.board[i] is None or board.turn != board.board[i].player: continue
 
-            ret = board.movablePlace(i)
-            for x in ret:
-                bd = copy.deepcopy(board)
-                bd.move(i, x)
+                ret = board.movablePlace(i)
+                for x in ret:
+                    bd = copy.deepcopy(board)
+                    bd.move(i, x)
 
-                bd.turn = bd.turn%2 + 1
-                score = alpha_beta(player, bd, depth-1, alpha, beta)
-                if alpha < score:
-                    alpha = score
-                if beta <= alpha:
-                    return alpha
-                
-        return alpha
-                
-    else:                       # 相手の手番
-        if board.isTried(board.turn):
-            if board.turn == 1: return -5000
-            else: return 5000
-            
-        for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if alpha < score:
+                        alpha = score
+                    if beta <= alpha:
+                        return alpha
 
-            ret = board.movablePlace(i)
-            for x in ret:
-                bd = copy.deepcopy(board)
-                bd.move(i, x)
-
-                bd.turn = bd.turn%2 + 1
-                score = alpha_beta(player, bd, depth-1, alpha, beta)
-                if score < beta:
-                    beta = score
-                if beta <= alpha:
-                    return beta
-        return beta
+            for i, p in enumerate(board.capturedPiece1):
+                 for dst in board.notOnBoard:
+                    bd = copy.deepcopy(board)
+                    bd.c_move(i, p, ban.Board.str2index[dst])
                     
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if alpha < score:
+                        alpha = score
+                    if beta <= alpha:
+                        return alpha
+                
+            return alpha
+                
+        else:                       # 相手の手番
+            if board.isTried(board.turn): return -5000
+            
+            for i in range(12):
+                if board.board[i] is None or board.turn != board.board[i].player: continue
+
+                ret = board.movablePlace(i)
+                for x in ret:
+                    bd = copy.deepcopy(board)
+                    bd.move(i, x)
+
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if score < beta:
+                        beta = score
+                    if beta <= alpha:
+                        return beta
+
+            for i, p in enumerate(board.capturedPiece2):
+                for dst in board.notOnBoard:
+                    bd = copy.deepcopy(board)
+                    bd.c_move(i, p, ban.Board.str2index[dst])
+                    
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if score < beta:
+                        beta = score
+                    if beta <= alpha:
+                        return beta
+                    
+            return beta
+
+    # 後手の時
+    if player == 2:
+        if board.turn == player:    # 自分の手番
+            if board.isTried(board.turn): return -5000
+
+            for i in range(12):
+                if board.board[i] is None or board.turn != board.board[i].player: continue
+
+                ret = board.movablePlace(i)
+                for x in ret:
+                    bd = copy.deepcopy(board)
+                    bd.move(i, x)
+
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if score < beta:
+                        beta = score
+                    if beta <= alpha:
+                        return beta
+            return beta
+
+        else:                       # 相手の手番
+            if board.isTried(board.turn): return 5000
+
+            for i in range(12):
+                if board.board[i] is None or board.turn != board.board[i].player: continue
+
+                ret = board.movablePlace(i)
+                for x in ret:
+                    bd = copy.deepcopy(board)
+                    bd.move(i, x)
+
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if alpha < score:
+                        alpha = score
+                    if beta <= alpha:
+                        return alpha
+            return alpha
+        
+
 """
 def minimax(player, board, depth):
     if str(board) in memo:
@@ -166,6 +231,8 @@ def minimax(player, board, depth):
 """
 
 def first_search(player, board):
+    start = time.time()
+    
     global memo
     ret_board = None
     board.turn = player%2 + 1  # first_searchで一回動かしてからminimaxに投げるので1->2 or 2->1にする
@@ -186,7 +253,7 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
 
-            s_result = alpha_beta(player, bd, 6, -9999, 9999) # とりあえず深さ4で探索する
+            s_result = alpha_beta(player, bd, 5, -9999, 9999) # とりあえず深さ4で探索する
             bd.turn = bd.turn%2 + 1
             memo[str(bd)] = s_result
 
@@ -213,7 +280,7 @@ def first_search(player, board):
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
                 
-                s_result = alpha_beta(player, bd, 6, -9999, 9999)
+                s_result = alpha_beta(player, bd, 5, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
                 memo[str(bd)] = s_result
                 
@@ -228,7 +295,7 @@ def first_search(player, board):
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
                 
-                s_result = alpha_beta(player, bd, 6, -9999, 9999)
+                s_result = alpha_beta(player, bd, 5, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
                 memo[str(bd)] = s_result
                 
@@ -236,7 +303,10 @@ def first_search(player, board):
                 bd.showBoard()
                 if s_result < val:
                     ret_board = (bd, "E"+str(i+1), dst)
-                    print(ret_board) 
+                    print(ret_board)
+
+    elapsed_time = time.time() - start
+    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
     
     return ret_board
 
