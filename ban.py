@@ -183,18 +183,18 @@ class Board():
         for i, x in enumerate(self.board):
             if x is None: continue
             if x.player == 1:
-                value += x.retValue()
-                if not isinstance(x, koma.Lion):
-                    value += len(self.movablePlace(i))*2
+                value += x.retValue() # 駒自体の点数
+                if not isinstance(x, koma.Lion): # ライオン以外で動ける範囲で点数
+                    value += len(self.movablePlace(i))*2                
             else:
                 value -= x.retValue()
                 if not isinstance(x, koma.Lion):
                     value -= len(self.movablePlace(i))*2
 
         for x in self.capturedPiece1:
-            value += x.retValue()
+            value += x.retValue()*2
         for x in self.capturedPiece2:
-            value -= x.retValue()
+            value -= x.retValue()*2
                 
         return value
                     

@@ -23,7 +23,8 @@ def minimax(player, board, depth):
         if player == 1: val = -5000
         if player == 2: val =  5000
 
-        if board.isTried(player):
+        # 自分がトライしてるか
+        if board.isTried(board.turn):
             if player == 1: return 9999
             else: return -9999
         
@@ -68,6 +69,11 @@ def minimax(player, board, depth):
     else:                    # 相手の手番
         if player == 1: val =  5000
         if player == 2: val = -5000
+
+        # 相手がトライしてるか
+        if board.isTried(board.turn):
+            if player == 1: return -9999
+            else: return 9999
         
         for i in range(12):
             if board.board[i] is None or board.turn != board.board[i].player: continue

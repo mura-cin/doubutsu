@@ -46,7 +46,7 @@ class Chick(Piece):
 
 class Hen(Piece):
 
-    VAL = 20
+    VAL = 40
 
     def __init__(self, player):
         super(Hen, self).__init__(player)
