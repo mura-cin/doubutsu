@@ -170,7 +170,7 @@ class Giraffe(Piece):
 
 class Lion(Piece):
 
-    VAL = 1000
+    VAL = 1500
 
     def __init__(self, player):
         super(Lion, self).__init__(player)

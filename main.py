@@ -8,6 +8,59 @@ import ban
 
 memo = {}
 
+def alpha_beta(player, board, depth, alpha, beta):
+    if str(board) in memo:
+        return memo[str(board)]
+    
+    val = board.calcBoard()
+    if val > 1000: return 5000
+    if val < -1000: return -5000
+    if depth == 0: return val
+
+    if board.turn == player:    # 自分の手番
+        if board.isTried(board.turn):
+            if board.turn == 1: return 5000
+            else: return -5000
+            
+        for i in range(12):
+            if board.board[i] is None or board.turn != board.board[i].player: continue
+
+            ret = board.movablePlace(i)
+            for x in ret:
+                bd = copy.deepcopy(board)
+                bd.move(i, x)
+
+                bd.turn = bd.turn%2 + 1
+                score = alpha_beta(player, bd, depth-1, alpha, beta)
+                if alpha < score:
+                    alpha = score
+                if beta <= alpha:
+                    return alpha
+                
+        return alpha
+                
+    else:                       # 相手の手番
+        if board.isTried(board.turn):
+            if board.turn == 1: return -5000
+            else: return 5000
+            
+        for i in range(12):
+            if board.board[i] is None or board.turn != board.board[i].player: continue
+
+            ret = board.movablePlace(i)
+            for x in ret:
+                bd = copy.deepcopy(board)
+                bd.move(i, x)
+
+                bd.turn = bd.turn%2 + 1
+                score = alpha_beta(player, bd, depth-1, alpha, beta)
+                if score < beta:
+                    beta = score
+                if beta <= alpha:
+                    return beta
+        return beta
+                    
+"""
 def minimax(player, board, depth):
     if str(board) in memo:
         return memo[str(board)]
@@ -15,7 +68,7 @@ def minimax(player, board, depth):
     if depth == 0:
         return board.calcBoard()
     
-    if board.calcBoard() > 1500: return 9999
+    if board.calcBoard() >  1500: return 9999
     if board.calcBoard() < -1500: return -9999
     val = 0
         
@@ -42,7 +95,7 @@ def minimax(player, board, depth):
                 if player == 1: val = max(val, score) # 評価値が大きくなるように
                 if player == 2: val = min(val, score) # 評価値が小さくなるように
 
-        """
+
         if player == 1:
             for i, p in enumerate(board.capturedPiece1):
                 for dst in board.notOnBoard:
@@ -63,7 +116,6 @@ def minimax(player, board, depth):
                     score = minimax(player, bd, depth-1)
                     
                     val = min(val, score)
-        """
         return val
     
     else:                    # 相手の手番
@@ -89,7 +141,6 @@ def minimax(player, board, depth):
                 if player == 1: val = min(val, score) # 評価値が小さくなるように
                 if player == 2: val = max(val, score) # 評価値が大きくなるように
 
-        """
         if player == 1:
             for i, p in enumerate(board.capturedPiece1):
                 for dst in board.notOnBoard:
@@ -110,11 +161,9 @@ def minimax(player, board, depth):
                     score = minimax(player, bd, depth-1)
                     
                     val = max(val, score)
-        """
-
 
         return val
-
+"""
 
 def first_search(player, board):
     global memo
@@ -137,7 +186,7 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
 
-            s_result = minimax(player, bd, 4) # とりあえず深さ2で探索する
+            s_result = alpha_beta(player, bd, 6, -9999, 9999) # とりあえず深さ4で探索する
             bd.turn = bd.turn%2 + 1
             memo[str(bd)] = s_result
 
@@ -164,7 +213,7 @@ def first_search(player, board):
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
                 
-                s_result = minimax(player, bd, 4)
+                s_result = alpha_beta(player, bd, 6, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
                 memo[str(bd)] = s_result
                 
@@ -178,9 +227,8 @@ def first_search(player, board):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
-
                 
-                s_result = minimax(player, bd, 4)
+                s_result = alpha_beta(player, bd, 6, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
                 memo[str(bd)] = s_result
                 
