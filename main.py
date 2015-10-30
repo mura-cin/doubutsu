@@ -7,6 +7,9 @@ import random
 import ban
 
 memo = {}
+serverName = "localhost"
+#serverName = "10.2.77.191"
+serverPort = 4444
 
 def alpha_beta(player, board, depth, alpha, beta):
     if str(board) in memo:
@@ -16,7 +19,6 @@ def alpha_beta(player, board, depth, alpha, beta):
     if val > 1000: return 5000
     if val < -1000: return -5000
     if depth == 0: return val
-
 
     # 先手の時
     if player == 1:
@@ -33,6 +35,7 @@ def alpha_beta(player, board, depth, alpha, beta):
 
                     bd.turn = bd.turn%2 + 1
                     score = alpha_beta(player, bd, depth-1, alpha, beta)
+
                     if alpha < score:
                         alpha = score
                     if beta <= alpha:
@@ -45,6 +48,7 @@ def alpha_beta(player, board, depth, alpha, beta):
                     
                     bd.turn = bd.turn%2 + 1
                     score = alpha_beta(player, bd, depth-1, alpha, beta)
+
                     if alpha < score:
                         alpha = score
                     if beta <= alpha:
@@ -65,6 +69,7 @@ def alpha_beta(player, board, depth, alpha, beta):
 
                     bd.turn = bd.turn%2 + 1
                     score = alpha_beta(player, bd, depth-1, alpha, beta)
+
                     if score < beta:
                         beta = score
                     if beta <= alpha:
@@ -77,6 +82,7 @@ def alpha_beta(player, board, depth, alpha, beta):
                     
                     bd.turn = bd.turn%2 + 1
                     score = alpha_beta(player, bd, depth-1, alpha, beta)
+
                     if score < beta:
                         beta = score
                     if beta <= alpha:
@@ -103,6 +109,19 @@ def alpha_beta(player, board, depth, alpha, beta):
                         beta = score
                     if beta <= alpha:
                         return beta
+
+            for i, p in enumerate(board.capturedPiece2):
+                 for dst in board.notOnBoard:
+                    bd = copy.deepcopy(board)
+                    bd.c_move(i, p, ban.Board.str2index[dst])
+                    
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if score < beta:
+                        beta = score
+                    if beta <= alpha:
+                        return beta
+
             return beta
 
         else:                       # 相手の手番
@@ -122,113 +141,22 @@ def alpha_beta(player, board, depth, alpha, beta):
                         alpha = score
                     if beta <= alpha:
                         return alpha
+
+            for i, p in enumerate(board.capturedPiece2):
+                for dst in board.notOnBoard:
+                    bd = copy.deepcopy(board)
+                    bd.c_move(i, p, ban.Board.str2index[dst])
+                    
+                    bd.turn = bd.turn%2 + 1
+                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    if alpha < score:
+                        alpha = score
+                    if beta <= alpha:
+                        return alpha
+                    
             return alpha
         
 
-"""
-def minimax(player, board, depth):
-    if str(board) in memo:
-        return memo[str(board)]
-    
-    if depth == 0:
-        return board.calcBoard()
-    
-    if board.calcBoard() >  1500: return 9999
-    if board.calcBoard() < -1500: return -9999
-    val = 0
-        
-    if board.turn == player: # 自分の手番
-        if player == 1: val = -5000
-        if player == 2: val =  5000
-
-        # 自分がトライしてるか
-        if board.isTried(board.turn):
-            if player == 1: return 9999
-            else: return -9999
-        
-        for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
-            
-            ret = board.movablePlace(i)
-            for x in ret:
-                bd = copy.deepcopy(board)
-                bd.move(i, x)
-
-                bd.turn = bd.turn%2 + 1
-                score = minimax(player, bd, depth-1);
-
-                if player == 1: val = max(val, score) # 評価値が大きくなるように
-                if player == 2: val = min(val, score) # 評価値が小さくなるように
-
-
-        if player == 1:
-            for i, p in enumerate(board.capturedPiece1):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    score = minimax(player, bd, depth-1)
-                    
-                    val = max(val, score)
-        else:
-            for i, p in enumerate(board.capturedPiece2):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    score = minimax(player, bd, depth-1)
-                    
-                    val = min(val, score)
-        return val
-    
-    else:                    # 相手の手番
-        if player == 1: val =  5000
-        if player == 2: val = -5000
-
-        # 相手がトライしてるか
-        if board.isTried(board.turn):
-            if player == 1: return -9999
-            else: return 9999
-        
-        for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
-            
-            ret = board.movablePlace(i)
-            for x in ret:
-                bd = copy.deepcopy(board)
-                bd.move(i, x)
-
-                bd.turn = bd.turn%2 + 1
-                score = minimax(player, bd, depth-1)
-                
-                if player == 1: val = min(val, score) # 評価値が小さくなるように
-                if player == 2: val = max(val, score) # 評価値が大きくなるように
-
-        if player == 1:
-            for i, p in enumerate(board.capturedPiece1):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-
-                    bd.turn = bd.turn%2 + 1
-                    score = minimax(player, bd, depth-1)
-
-                    val = min(val, score)
-        else:
-            for i, p in enumerate(board.capturedPiece2):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    score = minimax(player, bd, depth-1)
-                    
-                    val = max(val, score)
-
-        return val
-"""
 
 def first_search(player, board):
     start = time.time()
@@ -245,7 +173,7 @@ def first_search(player, board):
 
     print("探索：")
     for i in range(12):
-        if board.board[i] is None or board.board[i].player != player: continue
+        if board.board[i] is None or board.board[i].player != player: continue        
 
         ret = board.movablePlace(i)
 
@@ -253,7 +181,14 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
 
-            s_result = alpha_beta(player, bd, 5, -9999, 9999) # とりあえず深さ4で探索する
+            s_result = alpha_beta(player, bd, 2, -9999, 9999)
+            if player == 1 and s_result == 5000:
+                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+                return ret_board
+            if player == 2 and s_result == -5000:
+                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+
+            s_result = alpha_beta(player, bd, 5, -9999, 9999) #深さ5で探索する
             bd.turn = bd.turn%2 + 1
             memo[str(bd)] = s_result
 
@@ -279,6 +214,10 @@ def first_search(player, board):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+
+                if alpha_beta(player, bd, 2, -9999, 9999) == 5000:
+                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+                    return ret_board
                 
                 s_result = alpha_beta(player, bd, 5, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
@@ -287,6 +226,7 @@ def first_search(player, board):
                 print("評価値:" + str(s_result))
                 bd.showBoard()
                 if s_result > val:
+                    val = s_result
                     ret_board = (bd, "D"+str(i+1), dst)
                     print(ret_board)
     else:
@@ -294,6 +234,10 @@ def first_search(player, board):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+
+                if alpha_beta(player, bd, 2, -9999, 9999) == -5000:
+                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+                    return ret_board
                 
                 s_result = alpha_beta(player, bd, 5, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
@@ -302,11 +246,14 @@ def first_search(player, board):
                 print("評価値:" + str(s_result))
                 bd.showBoard()
                 if s_result < val:
+                    val = s_result
                     ret_board = (bd, "E"+str(i+1), dst)
                     print(ret_board)
 
+    memo[str(ret_board[0])] = val 
     elapsed_time = time.time() - start
-    print("elapsed_time:{0}".format(elapsed_time) + "[sec]")
+    print()
+    print("# elapsed_time:{0}".format(elapsed_time) + "[sec]")
     
     return ret_board
 
@@ -318,9 +265,6 @@ def isMatchBoard(b1, b2):
 
 BUFSIZE = 1024
 
-serverName = "localhost"
-#serverName = "10.2.77.191"
-serverPort = 4444
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((serverName, serverPort))
