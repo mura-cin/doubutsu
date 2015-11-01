@@ -34,12 +34,10 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.move(i, x)
 
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
 
-                    if alpha < score:
-                        alpha = score
-                    if beta <= alpha:
-                        return alpha
+                    if alpha >= beta:
+                        return beta
 
             for i, p in enumerate(board.capturedPiece1):
                  for dst in board.notOnBoard:
@@ -47,12 +45,10 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.c_move(i, p, ban.Board.str2index[dst])
                     
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
-
-                    if alpha < score:
-                        alpha = score
-                    if beta <= alpha:
-                        return alpha
+                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
+                    
+                    if alpha >= beta:
+                        return beta
                 
             return alpha
                 
@@ -68,12 +64,10 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.move(i, x)
 
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
 
-                    if score < beta:
-                        beta = score
-                    if beta <= alpha:
-                        return beta
+                    if alpha >= beta:
+                        return alpha
 
             for i, p in enumerate(board.capturedPiece2):
                 for dst in board.notOnBoard:
@@ -81,12 +75,10 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.c_move(i, p, ban.Board.str2index[dst])
                     
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
+                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
 
-                    if score < beta:
-                        beta = score
-                    if beta <= alpha:
-                        return beta
+                    if alpha >= beta:
+                        return alpha
                     
             return beta
 
@@ -104,11 +96,9 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.move(i, x)
 
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
-                    if score < beta:
-                        beta = score
-                    if beta <= alpha:
-                        return beta
+                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
+                    if alpha >= beta:
+                        return alpha
 
             for i, p in enumerate(board.capturedPiece2):
                  for dst in board.notOnBoard:
@@ -116,11 +106,9 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.c_move(i, p, ban.Board.str2index[dst])
                     
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
-                    if score < beta:
-                        beta = score
-                    if beta <= alpha:
-                        return beta
+                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
+                    if alpha >= beta:
+                        return alpha
 
             return beta
 
@@ -136,11 +124,9 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.move(i, x)
 
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
-                    if alpha < score:
-                        alpha = score
-                    if beta <= alpha:
-                        return alpha
+                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
+                    if alpha >= beta:
+                        return beta
 
             for i, p in enumerate(board.capturedPiece2):
                 for dst in board.notOnBoard:
@@ -148,11 +134,9 @@ def alpha_beta(player, board, depth, alpha, beta):
                     bd.c_move(i, p, ban.Board.str2index[dst])
                     
                     bd.turn = bd.turn%2 + 1
-                    score = alpha_beta(player, bd, depth-1, alpha, beta)
-                    if alpha < score:
-                        alpha = score
-                    if beta <= alpha:
-                        return alpha
+                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
+                    if alpha >= beta:
+                        return beta
                     
             return alpha
         
@@ -181,16 +165,16 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
 
-            s_result = alpha_beta(player, bd, 2, -9999, 9999)
-            if player == 1 and s_result == 5000:
-                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-                return ret_board
-            if player == 2 and s_result == -5000:
-                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+            # s_result = alpha_beta(player, bd, 2, -9999, 9999)
+            # if player == 1 and s_result == 5000:
+            #     ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+            #     return ret_board
+            # if player == 2 and s_result == -5000:
+            #     ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
 
             s_result = alpha_beta(player, bd, 5, -9999, 9999) #深さ5で探索する
             bd.turn = bd.turn%2 + 1
-            memo[str(bd)] = s_result
+#            memo[str(bd)] = s_result
 
             print("評価値: " + str(s_result))
             bd.showBoard()
@@ -215,13 +199,13 @@ def first_search(player, board):
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
 
-                if alpha_beta(player, bd, 2, -9999, 9999) == 5000:
-                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-                    return ret_board
+#                if alpha_beta(player, bd, 2, -9999, 9999) == 5000:
+#                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+#                    return ret_board
                 
-                s_result = alpha_beta(player, bd, 5, -9999, 9999)
+                s_result = alpha_beta(player, bd, 4, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
-                memo[str(bd)] = s_result
+#                memo[str(bd)] = s_result
                 
                 print("評価値:" + str(s_result))
                 bd.showBoard()
@@ -235,13 +219,13 @@ def first_search(player, board):
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
 
-                if alpha_beta(player, bd, 2, -9999, 9999) == -5000:
-                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-                    return ret_board
+#                if alpha_beta(player, bd, 2, -9999, 9999) == -5000:
+#                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+#                    return ret_board
                 
-                s_result = alpha_beta(player, bd, 5, -9999, 9999)
+                s_result = alpha_beta(player, bd, 4, -9999, 9999)
                 bd.turn = bd.turn%2 + 1
-                memo[str(bd)] = s_result
+#                memo[str(bd)] = s_result
                 
                 print("評価値:" + str(s_result))
                 bd.showBoard()
