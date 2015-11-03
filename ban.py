@@ -162,6 +162,7 @@ class Board():
             self.capturedPiece2.pop(ci)
         self.board[di] = c
 
+    # playerのライオンがトライしているか
     def isTried(self, player):
         if player == 1:
             # 0 1 2を見てライオンがいるかどうか
@@ -175,6 +176,19 @@ class Board():
                 if isinstance(self.board[i], koma.Lion) and self.board[i].player == player:
                     return True
         return False
+
+    # playerが相手のライオンをキャッチしているか
+    def isCatchedLion(self, player):
+        if player == 1:
+            for i in range(12):
+                if isinstance(self.board[i], koma.Lion) and self.board[i].player != player:
+                    return False
+        else:
+            for i in range(12):
+                if isinstance(self.board[i], koma.Lion) and self.board[i].player != player:
+                    return False
+
+        return True
 
     # 評価値を計算
     def calcBoard(self):

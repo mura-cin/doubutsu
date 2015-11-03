@@ -6,25 +6,20 @@ import copy
 import random
 import ban
 
-memo = {}
 serverName = "localhost"
 #serverName = "10.2.77.191"
 serverPort = 4444
 
 def alpha_beta(player, board, depth, alpha, beta):
-    if str(board) in memo:
-        return memo[str(board)]
-    
     val = board.calcBoard()
-    if val > 1000: return 5000
-    if val < -1000: return -5000
-    if depth == 0: return val
+    if depth <= 0: return val
 
     # 先手の時
     if player == 1:
         if board.turn == player:    # 自分の手番
             if board.isTried(board.turn): return 5000
-            
+
+            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
@@ -32,29 +27,26 @@ def alpha_beta(player, board, depth, alpha, beta):
                 for x in ret:
                     bd = copy.deepcopy(board)
                     bd.move(i, x)
-
-                    bd.turn = bd.turn%2 + 1
-                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-
-                    if alpha >= beta:
-                        return beta
+                    if bd.isCatchedLion(bd.turn): return 5000
+                    searchList.append(bd)
 
             for i, p in enumerate(board.capturedPiece1):
                  for dst in board.notOnBoard:
                     bd = copy.deepcopy(board)
                     bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-                    
-                    if alpha >= beta:
-                        return beta
+                    searchList.append(bd)
+
+            for bd in searchList:
+                bd.turn = bd.turn%2 + 1
+                alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
+                if alpha >= beta: return beta
                 
             return alpha
                 
         else:                       # 相手の手番
             if board.isTried(board.turn): return -5000
-            
+
+            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
@@ -62,23 +54,19 @@ def alpha_beta(player, board, depth, alpha, beta):
                 for x in ret:
                     bd = copy.deepcopy(board)
                     bd.move(i, x)
-
-                    bd.turn = bd.turn%2 + 1
-                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
-
-                    if alpha >= beta:
-                        return alpha
+                    if bd.isCatchedLion(bd.turn): return -5000
+                    searchList.append(bd)
 
             for i, p in enumerate(board.capturedPiece2):
                 for dst in board.notOnBoard:
                     bd = copy.deepcopy(board)
                     bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
+                    searchList.append(bd)
 
-                    if alpha >= beta:
-                        return alpha
+            for bd in searchList:
+                bd.turn = bd.turn%2 + 1
+                beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
+                if alpha >= beta: return alpha
                     
             return beta
 
@@ -87,6 +75,7 @@ def alpha_beta(player, board, depth, alpha, beta):
         if board.turn == player:    # 自分の手番
             if board.isTried(board.turn): return -5000
 
+            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
@@ -94,27 +83,26 @@ def alpha_beta(player, board, depth, alpha, beta):
                 for x in ret:
                     bd = copy.deepcopy(board)
                     bd.move(i, x)
-
-                    bd.turn = bd.turn%2 + 1
-                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
-                    if alpha >= beta:
-                        return alpha
+                    if bd.isCatchedLion(bd.turn): return -5000
+                    searchList.append(bd)
 
             for i, p in enumerate(board.capturedPiece2):
                  for dst in board.notOnBoard:
                     bd = copy.deepcopy(board)
                     bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
-                    if alpha >= beta:
-                        return alpha
+                    searchList.append(bd)
+
+            for bd in searchList:
+                bd.turn = bd.turn%2 + 1
+                beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
+                if alpha >= beta: return alpha
 
             return beta
 
         else:                       # 相手の手番
             if board.isTried(board.turn): return 5000
 
+            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
@@ -122,21 +110,20 @@ def alpha_beta(player, board, depth, alpha, beta):
                 for x in ret:
                     bd = copy.deepcopy(board)
                     bd.move(i, x)
-
-                    bd.turn = bd.turn%2 + 1
-                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-                    if alpha >= beta:
-                        return beta
+                    if bd.isCatchedLion(bd.turn): return 5000
+                    searchList.append(bd)
 
             for i, p in enumerate(board.capturedPiece2):
                 for dst in board.notOnBoard:
                     bd = copy.deepcopy(board)
                     bd.c_move(i, p, ban.Board.str2index[dst])
-                    
-                    bd.turn = bd.turn%2 + 1
-                    alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-                    if alpha >= beta:
-                        return beta
+                    searchList.append(bd)
+
+
+            for bd in searchList:
+                bd.turn = bd.turn%2 + 1
+                alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
+                if alpha >= beta: return beta
                     
             return alpha
         
@@ -145,9 +132,8 @@ def alpha_beta(player, board, depth, alpha, beta):
 def first_search(player, board):
     start = time.time()
     
-    global memo
     ret_board = None
-    board.turn = player%2 + 1  # first_searchで一回動かしてからminimaxに投げるので1->2 or 2->1にする
+    board.turn = player%2 + 1  # first_searchで一回動かしてからalpha_betaに投げるので1->2 or 2->1にする
     val = 0
 
     if player == 1:
@@ -156,6 +142,7 @@ def first_search(player, board):
         val = 9999
 
     print("探索：")
+    searchList = []
     for i in range(12):
         if board.board[i] is None or board.board[i].player != player: continue        
 
@@ -164,77 +151,52 @@ def first_search(player, board):
         for x in ret:
             bd = copy.deepcopy(board)
             bd.move(i, x)
-
-            # s_result = alpha_beta(player, bd, 2, -9999, 9999)
-            # if player == 1 and s_result == 5000:
-            #     ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-            #     return ret_board
-            # if player == 2 and s_result == -5000:
-            #     ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-
-            s_result = alpha_beta(player, bd, 5, -9999, 9999) #深さ5で探索する
-            bd.turn = bd.turn%2 + 1
-#            memo[str(bd)] = s_result
-
-            print("評価値: " + str(s_result))
-            bd.showBoard()
-
-            if s_result == val:
-                if random.randint(1, 2) == 1:
-                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-
-            if player == 1 and s_result > val:
-                val = s_result
-                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-                print(ret_board)
-
-            if player == 2 and s_result < val:
-                val = s_result
-                ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-                print(ret_board)
+            if bd.isCatchedLion(player): return (bd, ban.Board.index2str[i], ban.Board.index2str[x])
+            searchList.append(tuple([bd, ban.Board.index2str[i], ban.Board.index2str[x]]))
 
     if player == 1:
         for i, p in enumerate(board.capturedPiece1):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+                searchList.append(tuple([bd, "D"+str(i+1), dst]))
 
-#                if alpha_beta(player, bd, 2, -9999, 9999) == 5000:
-#                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-#                    return ret_board
-                
-                s_result = alpha_beta(player, bd, 4, -9999, 9999)
-                bd.turn = bd.turn%2 + 1
-#                memo[str(bd)] = s_result
-                
-                print("評価値:" + str(s_result))
-                bd.showBoard()
-                if s_result > val:
-                    val = s_result
-                    ret_board = (bd, "D"+str(i+1), dst)
+        for bd in searchList:
+            s_result = alpha_beta(player, bd[0], 5, -9999, 9999)
+            print("評価値：" + str(s_result))
+            bd[0].showBoard()
+
+            if s_result == val:
+                if random.randint(1, 2) == 1:
+                    ret_board = bd
                     print(ret_board)
+            if s_result > val:
+                val = s_result
+                ret_board = bd
+                print(ret_board)
+            
+
     else:
         for i, p in enumerate(board.capturedPiece2):
             for dst in board.notOnBoard:
                 bd = copy.deepcopy(board)
                 bd.c_move(i, p, ban.Board.str2index[dst])
+                searchList.append(tuple([bd, "E"+str(i+1), dst]))
 
-#                if alpha_beta(player, bd, 2, -9999, 9999) == -5000:
-#                    ret_board = (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-#                    return ret_board
-                
-                s_result = alpha_beta(player, bd, 4, -9999, 9999)
-                bd.turn = bd.turn%2 + 1
-#                memo[str(bd)] = s_result
-                
-                print("評価値:" + str(s_result))
-                bd.showBoard()
-                if s_result < val:
-                    val = s_result
-                    ret_board = (bd, "E"+str(i+1), dst)
+        for bd in searchList:
+            s_result = alpha_beta(player, bd[0], 5, -9999, 9999)
+            print("評価値：" + str(s_result))
+            bd[0].showBoard()
+
+            if s_result == val:
+                if random.randint(1, 2) == 1:
+                    ret_board = bd
                     print(ret_board)
+            if s_result < val:
+                val = s_result
+                ret_board = bd
+                print(ret_board)
 
-    memo[str(ret_board[0])] = val 
     elapsed_time = time.time() - start
     print()
     print("# elapsed_time:{0}".format(elapsed_time) + "[sec]")
@@ -272,15 +234,24 @@ while True:
     s.send((line + "\n").encode())
     time.sleep(0.1)
     ret = s.recv(BUFSIZE).rstrip().decode()
-    if str(player) not in ret: continue
-    
+
     line = "board"
     s.send((line + "\n").encode())
     time.sleep(0.1)
-    ret = s.recv(BUFSIZE).rstrip().decode()
-    board = ban.Board(ret)
-    board.turn = player
+    ret2 = s.recv(BUFSIZE).rstrip().decode()
+    board = ban.Board(ret2)
+    if board.calcBoard() > 1000:
+        print("Player1 win!")
+        input("")
+        break
+    if board.calcBoard() < -1000:
+        print("Player2 win!")
+        input("")
+        break
+    if str(player) not in ret: continue
 
+    
+    board.turn = player
     board.showBoard()
 
     # 反則の判定
@@ -288,7 +259,7 @@ while True:
     if prevBoard is not None:
         flag = False
         prevBoard.turn = anoPlayer
-        print("->" + str(board.board))
+        print("-> " + str(board.board))
         for x in prevBoard.makeNextBoard():
             print(x)
             if isMatchBoard(board.board, x):
@@ -314,11 +285,7 @@ while True:
         input("")
         break
 
-    ret = first_search(player, board)
-    if ret is not None:
-        board, src, dst = ret
-    else:
-        print("Player" + str(player) + "lose...")
+    board, src, dst = first_search(player, board)
 
     print("")
     print("決定した手：")
