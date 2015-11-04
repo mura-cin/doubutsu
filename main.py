@@ -17,8 +17,8 @@ def alpha_beta(player, board, depth, alpha, beta):
     # 先手の時
     if player == 1:
         if board.turn == player:    # 自分の手番
-            if board.isTried(board.turn): return 5000
-
+            if board.isTried(1): return 5000
+            
             searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -44,8 +44,8 @@ def alpha_beta(player, board, depth, alpha, beta):
             return alpha
                 
         else:                       # 相手の手番
-            if board.isTried(board.turn): return -5000
-
+            if board.isTried(2): return -5000
+            
             searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -73,8 +73,8 @@ def alpha_beta(player, board, depth, alpha, beta):
     # 後手の時
     if player == 2:
         if board.turn == player:    # 自分の手番
-            if board.isTried(board.turn): return -5000
-
+            if board.isTried(2): return -5000
+            
             searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -100,8 +100,8 @@ def alpha_beta(player, board, depth, alpha, beta):
             return beta
 
         else:                       # 相手の手番
-            if board.isTried(board.turn): return 5000
-
+            if board.isTried(1): return 5000
+            
             searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -166,6 +166,9 @@ def first_search(player, board):
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
+            if s_result == 5000:
+                return bd
+
             if s_result == val:
                 if random.randint(1, 2) == 1:
                     ret_board = bd
@@ -187,6 +190,9 @@ def first_search(player, board):
             s_result = alpha_beta(player, bd[0], 5, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
+
+            if s_result == -5000:
+                return bd
 
             if s_result == val:
                 if random.randint(1, 2) == 1:

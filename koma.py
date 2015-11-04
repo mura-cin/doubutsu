@@ -9,7 +9,7 @@ class Piece():
         
 class Chick(Piece):
 
-    VAL = 10
+    VAL = 5
 
     def __init__(self, player):
         super(Chick, self).__init__(player)
