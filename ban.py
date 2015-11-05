@@ -1,4 +1,4 @@
-
+# -*- coding: utf-8 -*-
 """
 座標について
 
@@ -15,24 +15,24 @@ D -> プレイヤー1の持ち駒
 import koma
 import copy
 
-class Board():
 
-    str2index = {x:i for i, x in enumerate([chr(ord('A')+x) + str(y)
-                                        for y in range(1,5) for x in range(3)])}
-    index2str = {i:x for i, x in enumerate([chr(ord('A')+x) + str(y)
-                                        for y in range(1,5) for x in range(3)])}
-    
+class Board:
+    str2index = {x: i for i, x in enumerate([chr(ord('A') + x) + str(y)
+                                             for y in range(1, 5) for x in range(3)])}
+    index2str = {i: x for i, x in enumerate([chr(ord('A') + x) + str(y)
+                                             for y in range(1, 5) for x in range(3)])}
+
     # Board命令で返ってきた文字列を引数として盤面を生成する。
     def __init__(self, bd):
         bd = bd.split(", ")
-        bd[-1] = bd[-1].rstrip(",") # 最後にカンマが残ってしまうので、それを除去
-        
-        self.board = []          # 盤面情報
-        self.turn = 1            # 手番
-        self.notOnBoard = []     # 駒が置かれていない座標
-        self.capturedPiece1 = [] # プレイヤー1の持ち駒
-        self.capturedPiece2 = [] # プレイヤー2の持ち駒
-        
+        bd[-1] = bd[-1].rstrip(",")  # 最後にカンマが残ってしまうので、それを除去
+
+        self.board = []  # 盤面情報
+        self.turn = 1  # 手番
+        self.notOnBoard = []  # 駒が置かれていない座標
+        self.capturedPiece1 = []  # プレイヤー1の持ち駒
+        self.capturedPiece2 = []  # プレイヤー2の持ち駒
+
         for i in range(12):
             c, k = bd[i].split(" ")
             if k[0] == 'c':
@@ -45,7 +45,7 @@ class Board():
                 self.board.append(koma.Giraffe(int(k[1])))
             elif k[0] == 'l':
                 self.board.append(koma.Lion(int(k[1])))
-            else:               # 何もない
+            else:  # 何もない
                 self.board.append(None)
                 self.notOnBoard.append(c)
 
@@ -62,7 +62,7 @@ class Board():
                     self.capturedPiece1.append(koma.Giraffe(1))
                 elif k[0] == 'l':
                     self.capturedPiece1.append(koma.Lion(1))
-                    
+
             elif c[0] == 'E':
                 if k[0] == 'c':
                     self.capturedPiece2.append(koma.Chick(2))
@@ -94,7 +94,7 @@ class Board():
         ret = []
         for dst in self.board[src].nextMove[src]:
             if self.board[dst] is None \
-               or self.board[src].player != self.board[dst].player:
+                    or self.board[src].player != self.board[dst].player:
                 ret.append(dst)
         return ret
 
@@ -115,7 +115,7 @@ class Board():
             for i, p in enumerate(self.capturedPiece1):
                 for j in range(12):
                     if self.board[j] is not None: continue
-                    
+
                     bd = copy.deepcopy(self)
                     bd.c_move(i, p, j)
                     ret.append(bd.board)
@@ -123,12 +123,11 @@ class Board():
             for i, p in enumerate(self.capturedPiece2):
                 for j in range(12):
                     if self.board[j] is not None: continue
-                    
+
                     bd = copy.deepcopy(self)
                     bd.c_move(i, p, j)
                     ret.append(bd.board)
         return ret
-
 
     # 盤上の駒を動かす
     def move(self, si, di):
@@ -151,9 +150,9 @@ class Board():
                 self.board[di] = koma.Hen(2)
             else:
                 self.board[di] = self.board[si]
-                
+
         self.board[si] = None
-        
+
     # 持ち駒を動かす(持ち駒のindex, 持ち駒のオブジェクト, 移動先のindex)
     def c_move(self, ci, c, di):
         if c.player == 1:
@@ -197,21 +196,20 @@ class Board():
         for i, x in enumerate(self.board):
             if x is None: continue
             if x.player == 1:
-                value += x.retValue() # 駒自体の点数
-                if not isinstance(x, koma.Lion): # ライオン以外で動ける範囲で点数
-                    value += len(self.movablePlace(i))*2                
+                value += x.retValue()  # 駒自体の点数
+                if not isinstance(x, koma.Lion):  # ライオン以外で動ける範囲で点数
+                    value += len(self.movablePlace(i)) * 2
             else:
                 value -= x.retValue()
                 if not isinstance(x, koma.Lion):
-                    value -= len(self.movablePlace(i))*2
+                    value -= len(self.movablePlace(i)) * 2
 
         for x in self.capturedPiece1:
             value += x.retValue()
         for x in self.capturedPiece2:
             value -= x.retValue()
-                
+
         return value
-                    
 
     # デバッグ用
     def showBoard(self):
@@ -222,8 +220,8 @@ class Board():
 
         for i in range(4):
             line = ""
-            for j in range(3):                
-                b = self.board[i*3 + j]
+            for j in range(3):
+                b = self.board[i * 3 + j]
                 if b is not None:
                     line += str(b) + " "
                 else:
@@ -234,4 +232,3 @@ class Board():
             print("持ち駒：なし")
         else:
             print("持ち駒：" + str(self.capturedPiece1))
-                

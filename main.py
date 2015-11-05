@@ -7,7 +7,7 @@ import random
 import ban
 
 serverName = "localhost"
-#serverName = "10.2.77.191"
+#serverName = "10.2.77.149"
 serverPort = 4444
 
 def alpha_beta(player, board, depth, alpha, beta):
@@ -18,7 +18,7 @@ def alpha_beta(player, board, depth, alpha, beta):
     if player == 1:
         if board.turn == player:    # 自分の手番
             if board.isTried(1): return 5000
-            
+
             searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
@@ -27,14 +27,13 @@ def alpha_beta(player, board, depth, alpha, beta):
                 for x in ret:
                     bd = copy.deepcopy(board)
                     bd.move(i, x)
-                    if bd.isCatchedLion(bd.turn): return 5000
+                    if board.isCatchedLion(board.turn): return 5000
                     searchList.append(bd)
 
             for i, p in enumerate(board.capturedPiece1):
                  for dst in board.notOnBoard:
                     bd = copy.deepcopy(board)
                     bd.c_move(i, p, ban.Board.str2index[dst])
-                    searchList.append(bd)
 
             for bd in searchList:
                 bd.turn = bd.turn%2 + 1
@@ -144,7 +143,7 @@ def first_search(player, board):
     print("探索：")
     searchList = []
     for i in range(12):
-        if board.board[i] is None or board.board[i].player != player: continue        
+        if board.board[i] is None or board.board[i].player != player: continue
 
         ret = board.movablePlace(i)
 
@@ -162,7 +161,10 @@ def first_search(player, board):
                 searchList.append(tuple([bd, "D"+str(i+1), dst]))
 
         for bd in searchList:
-            s_result = alpha_beta(player, bd[0], 5, -9999, 9999)
+            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
+                s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
+            else:
+                s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -177,8 +179,9 @@ def first_search(player, board):
                 val = s_result
                 ret_board = bd
                 print(ret_board)
-            
 
+            if time.time() - start > 120:
+                return ret_board
     else:
         for i, p in enumerate(board.capturedPiece2):
             for dst in board.notOnBoard:
@@ -187,7 +190,10 @@ def first_search(player, board):
                 searchList.append(tuple([bd, "E"+str(i+1), dst]))
 
         for bd in searchList:
-            s_result = alpha_beta(player, bd[0], 5, -9999, 9999)
+            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
+                s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
+            else:
+                s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -202,6 +208,9 @@ def first_search(player, board):
                 val = s_result
                 ret_board = bd
                 print(ret_board)
+
+            if time.time() - start > 120: # 2分を超えていたら強制的に探索を打ち切る
+                return ret_board
 
     elapsed_time = time.time() - start
     print()
