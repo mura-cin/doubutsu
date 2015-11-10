@@ -7,153 +7,154 @@ import random
 import ban
 
 serverName = "localhost"
-#serverName = "10.2.77.149"
+#serverName = "10.2.72.149"
 serverPort = 4444
 
-def alpha_beta(player, board, depth, alpha, beta):
-    val = board.calcBoard()
-    if depth <= 0: return val
+# プレイヤー1の場合
+def alpha_beta1(board, depth, alpha, beta):
+    if depth <= 0: return board.calcBoard()
 
-    # 先手の時
-    if player == 1:
-        if board.turn == player:    # 自分の手番
-            if board.isTried(1): return 5000
+    if board.turn == player:    # 自分の手番
+        if board.isTried(1): return 5000
 
-            for i in range(12):
-                if board.board[i] is None or board.board[i].player != player: continue
+        for i in range(12):
+            if board.board[i] is None or board.board[i].player != player: continue
 
-                ret = board.movablePlace(i)
-                for x in ret:
-                    captured = board.move(i, x)
-                    if board.isCatchedLion(1):
-                        board.restore_move(x, i, captured)
-                        return 5000
+            ret = board.movablePlace(i)
+            for x in ret:
+                captured = board.move(i, x)
+                if board.isCatchedLion(1):
+                    board.restore_move(x, i, captured)
+                    return 5000
 
-                    board.turn = 2
-                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 1
-                    board.restore_move(x, i, captured);
-                    if alpha >= beta: return beta
+                board.turn = 2
+                alpha = max(alpha, alpha_beta1(board, depth-1, alpha, beta))
+                board.turn = 1
 
-            for i, p in enumerate(board.capturedPiece1):
-                for j in range(12):
-                    if board.board[j] is not None: continue
+                board.restore_move(x, i, captured)
+                if alpha >= beta: return beta
 
-                    board.c_move(i, p, j)
-                    board.turn = 2
-                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 1
-                    board.c_restore_move(j, i)
-                    if alpha >= beta: return beta
+        for i, p in enumerate(board.capturedPiece1):
+            for j in range(12):
+                if board.board[j] is not None: continue
+
+                board.c_move(i, p, j)
+                board.turn = 2
+                alpha = max(alpha, alpha_beta1(board, depth-1, alpha, beta))
+                board.turn = 1
+                board.c_restore_move(j, i)
+                if alpha >= beta: return beta
                 
-            return alpha
+        return alpha
                 
-        else:                       # 相手の手番
-            if board.isTried(2): return -5000
+    else:                       # 相手の手番
+        if board.isTried(2): return -5000
 
-            for i in range(12):
-                if board.board[i] is None or board.turn != board.board[i].player: continue
+        for i in range(12):
+            if board.board[i] is None or board.turn != board.board[i].player: continue
 
-                ret = board.movablePlace(i)
-                for x in ret:
-                    captured = board.move(i, x);
-                    if board.isCatchedLion(2):
-                        board.restore_move(x, i, captured)
-                        return -5000
-
-                    board.turn = 1
-                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 2
-                    
+            ret = board.movablePlace(i)
+            for x in ret:
+                captured = board.move(i, x);
+                if board.isCatchedLion(2):
                     board.restore_move(x, i, captured)
-                    if alpha >= beta: return alpha
+                    return -5000
 
-            for i, p in enumerate(board.capturedPiece2):
-                for j in range(12):
-                    if board.board[j] is not None: continue
+                board.turn = 1
+                beta = min(beta, alpha_beta1(board, depth-1, alpha, beta))
+                board.turn = 2
                     
-                    board.c_move(i, p, j)
-                    
-                    board.turn = 1
-                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 2
-                    
-                    board.c_restore_move(j, i)
-                    if alpha >= beta: return alpha
-                    
-            return beta
+                board.restore_move(x, i, captured)
+                if alpha >= beta: return alpha
 
-    # 後手の時
-    if player == 2:
-        if board.turn == player:    # 自分の手番
-            if board.isTried(2): return -5000
+        for i, p in enumerate(board.capturedPiece2):
+            for j in range(12):
+                if board.board[j] is not None: continue
+                    
+                board.c_move(i, p, j)
+                    
+                board.turn = 1
+                beta = min(beta, alpha_beta1(board, depth-1, alpha, beta))
+                board.turn = 2
+                    
+                board.c_restore_move(j, i)
+                if alpha >= beta: return alpha
+                    
+        return beta
+
+# プレイヤー2の時
+def alpha_beta2(board, depth, alpha, beta):
+    if depth <= 0: return board.calcBoard()
+    
+    if board.turn == player:    # 自分の手番
+        if board.isTried(2): return -5000
             
-            for i in range(12):
-                if board.board[i] is None or board.turn != board.board[i].player: continue
+        for i in range(12):
+            if board.board[i] is None or board.turn != board.board[i].player: continue
 
-                ret = board.movablePlace(i)
-                for x in ret:
-                    captured = board.move(i, x)
-                    if board.isCatchedLion(2):
-                        board.restore_move(x, i, captured)
-                        return -5000
-
-                    board.turn = 1
-                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 2
-
+            ret = board.movablePlace(i)
+            for x in ret:
+                captured = board.move(i, x)
+                if board.isCatchedLion(2):
                     board.restore_move(x, i, captured)
-                    if alpha >= beta: return alpha
+                    return -5000
 
-            for i, p in enumerate(board.capturedPiece2):
-                for j in range(12):
-                    if board.board[j] is not None: continue
-                    
-                    board.c_move(i, p, j)
+                board.turn = 1
+                beta = min(beta, alpha_beta2(board, depth-1, alpha, beta))
+                board.turn = 2
 
-                    board.turn = 1
-                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 2
+                board.restore_move(x, i, captured)
+                if alpha >= beta: return alpha
 
-                    board.c_restore_move(j, i)
-                    if alpha >= beta: return alpha
+        for i, p in enumerate(board.capturedPiece2):
+            for j in range(12):
+                if board.board[j] is not None: continue
+                
+                board.c_move(i, p, j)
 
-            return beta
+                board.turn = 1
+                beta = min(beta, alpha_beta2(board, depth-1, alpha, beta))
+                board.turn = 2
 
-        else:                       # 相手の手番
-            if board.isTried(1): return 5000
+                board.c_restore_move(j, i)
+                if alpha >= beta: return alpha
+
+        return beta
+
+    else:                       # 相手の手番
+        if board.isTried(1): return 5000
             
-            for i in range(12):
-                if board.board[i] is None or board.turn != board.board[i].player: continue
+        for i in range(12):
+            if board.board[i] is None or board.turn != board.board[i].player: continue
 
-                ret = board.movablePlace(i)
-                for x in ret:
-                    captured = board.move(i, x)
-                    if board.isCatchedLion(1):
-                        board.restore_move(x, i, captured)
-                        return 5000
-
-                    board.turn = 2
-                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 1
-
+            ret = board.movablePlace(i)
+            for x in ret:
+                captured = board.move(i, x)
+                if board.isCatchedLion(1):
                     board.restore_move(x, i, captured)
-                    if alpha >= beta: return beta
+                    return 5000
 
-            for i, p in enumerate(board.capturedPiece2):
-                for j in range(12):
-                    if board.board[j] is not None: continue
+                board.turn = 2
+                alpha = max(alpha, alpha_beta2(board, depth-1, alpha, beta))
+                board.turn = 1
+
+                board.restore_move(x, i, captured)
+                if alpha >= beta: return beta
+
+        for i, p in enumerate(board.capturedPiece2):
+            for j in range(12):
+                if board.board[j] is not None: continue
                     
-                    board.c_move(i, p, j)
+                board.c_move(i, p, j)
 
-                    board.turn = 2
-                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
-                    board.turn = 1
+                board.turn = 2
+                alpha = max(alpha, alpha_beta2(board, depth-1, alpha, beta))
+                board.turn = 1
 
-                    board.c_restore_move(j, i)
-                    if alpha >= beta: return beta
+                board.c_restore_move(j, i)
+                if alpha >= beta: return beta
                     
-            return alpha
+        return alpha
         
 
 
@@ -191,11 +192,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta(player, bd[0], 3, -9999, 9999)
+                s_result = alpha_beta1(bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
+                s_result = alpha_beta1(bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
+                s_result = alpha_beta1(bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -221,11 +222,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta(player, bd[0], 3, -9999, 9999)
+                s_result = alpha_beta2(bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
+                s_result = alpha_beta2(bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
+                s_result = alpha_beta2(bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -255,8 +256,19 @@ def isMatchBoard(b1, b2):
             return False
     return True
 
-BUFSIZE = 1024
+def isCheating(prevBoard, recvBoard):
+    prevBoard.turn = anoPlayer
+    print("-> " + str(recvBoard.board))
+    for x in prevBoard.makeNextBoard():
+        print(x)
+        if isMatchBoard(recvBoard.board, x): return False
+        
+    return True
 
+
+
+
+BUFSIZE = 1024
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((serverName, serverPort))
@@ -276,74 +288,84 @@ else:
     
 
 while True:
-    line = "turn"    
-    s.send((line + "\n").encode())
-    time.sleep(0.1)
-    ret = s.recv(BUFSIZE).rstrip().decode()
-
     line = "board"
     s.send((line + "\n").encode())
     time.sleep(0.1)
-    ret2 = s.recv(BUFSIZE).rstrip().decode()
-    board = ban.Board(ret2)
-    if board.calcBoard() > 1000:
-        print("Player1 win!")
-        input("")
-        break
-    if board.calcBoard() < -1000:
-        print("Player2 win!")
-        input("")
-        break
-    if str(player) not in ret: continue
+    ret = s.recv(BUFSIZE).rstrip().decode()
+    board = ban.Board(ret)
+    if prevBoard is not None:
+        if isMatchBoard(prevBoard.board, board.board):
+            if board.calcBoard() > 1000:
+                print("Player1 win!")
+                input("")
+                break
+            elif board.calcBoard() < -1000:
+                print("Player2 win!")
+                input("")
+                break
+            else:
+                continue
+        else:
+            if isCheating(prevBoard, board):
+                if player == 1:
+                    print("Player2 is cheating")
+                    input("")
+                    break
+                else:
+                    print("Player1 is cheating")
+                    input("")
+                    break
+            else:
+                if board.calcBoard() > 1000:
+                    print("Player1 win!")
+                    input("")
+                    break
+                elif board.calcBoard() < -1000:
+                    print("Player2 win!")
+                    input("")
+                    break
+                elif board.isTried(player):
+                    print("Player" + str(player) + " lion is tried")
+                    input("")
+                    break
 
+    while True:
+        line = "turn"
+        s.send((line + "\n").encode())
+        time.sleep(0.1)
+        ret = s.recv(BUFSIZE).rstrip().decode()
+        if str(player) in ret: break
+        
     
     board.turn = player
     board.showBoard()
 
-    # 反則の判定
-    print("反則の判定：")
-    if prevBoard is not None:
-        flag = False
-        prevBoard.turn = anoPlayer
-        print("-> " + str(board.board))
-        for x in prevBoard.makeNextBoard():
-            print(x)
-            if isMatchBoard(board.board, x):
-                flag = True
-                break
-        if not flag:
-            print("Player " + str(anoPlayer) + " is foul")
-            input("")
-            break
+    # if board.calcBoard() > 1000:
+    #     print("Player1 win!")
+    #     input("")
+    #     break
+    # if board.calcBoard() < -1000:
+    #     print("Player2 win!")
+    #     input("")
+    #     break
 
-    if board.calcBoard() > 1000:
-        print("Player1 win!")
-        input("")
-        break
-    if board.calcBoard() < -1000:
-        print("Player2 win!")
-        input("")
-        break
+    # # トライしているか
+    # if board.isTried(player):
+    #     print("Player" + str(player) + " lion is tried!")
+    #     input("")
+    #     break
 
-    # トライしているか
-    if board.isTried(player):
-        print("Player" + str(player) + " lion is tried!")
-        input("")
-        break
-
-    board, src, dst = first_search(player, board)
+    prevBoard, src, dst = first_search(player, board)
 
     print("")
     print("決定した手：")
-    board.showBoard()
+    prevBoard.showBoard()
     
     line = "mv " + src + " " + dst
     print(line)
     s.send((line + "\n").encode())
     time.sleep(0.1)
     print(s.recv(BUFSIZE).rstrip().decode())
-
-    prevBoard = board
 
     time.sleep(1)
 
