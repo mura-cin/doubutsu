@@ -130,8 +130,12 @@ class Board:
         return ret
 
     # 盤上の駒を動かす
+    # 相手のコマを取った場合にはTrueを返す
     def move(self, si, di):
+        flag = False
+        
         if self.board[di] is not None:
+            flag = True
             if self.board[si].player == 1:
                 self.board[di].player = 1
                 self.capturedPiece1.append(self.board[di])
@@ -153,13 +157,49 @@ class Board:
 
         self.board[si] = None
 
-    # 持ち駒を動かす(持ち駒のindex, 持ち駒のオブジェクト, 移動先のindex)
-    def c_move(self, ci, c, di):
-        if c.player == 1:
+        return flag
+
+    # moveで動かしたのを復元する関数
+    def restore_move(self, di, si, captured):
+        # にわとり -> ひよこの処理
+        if self.board[di].player == 1:
+            if isinstance(self.board[di], koma.Hen) and 0 <= di <= 2:
+                self.board[si] = koma.Chick(1)
+            else:
+                self.board[si] = self.board[di]
+        else:
+            if isinstance(self.board[di], koma.Hen) and 9 <= di <= 11:
+                self.board[si] = koma.Chick(2)
+            else:
+                self.board[si] = self.board[di]
+
+        # 相手の駒をとっていた場合
+        if captured:
+            if self.board[si].player == 1:
+                self.capturedPiece1[-1].player = 2
+                self.board[di] = self.capturedPiece1.pop(-1)
+            else:
+                self.capturedPiece2[-1].player = 1
+                self.board[di] = self.capturedPiece2.pop(-1)
+        else:
+            self.board[di] = None
+            
+
+    # 持ち駒を動かす(持ち駒のindex, 移動先のindex)
+    def c_move(self, ci, p, di):
+        if p.player == 1:
             self.capturedPiece1.pop(ci)
         else:
             self.capturedPiece2.pop(ci)
-        self.board[di] = c
+        self.board[di] = p
+
+    # 持ち駒を動かしたのを復元する関数
+    def c_restore_move(self, di, ci):
+        if self.board[di].player == 1:
+            self.capturedPiece1.insert(ci, self.board[di])
+        else:
+            self.capturedPiece2.insert(ci, self.board[di])
+        self.board[di] = None
 
     # playerのライオンがトライしているか
     def isTried(self, player):
@@ -205,9 +245,9 @@ class Board:
                     value -= len(self.movablePlace(i)) * 2
 
         for x in self.capturedPiece1:
-            value += x.retValue()
+            value += x.retValue()*2
         for x in self.capturedPiece2:
-            value -= x.retValue()
+            value -= x.retValue()*2
 
         return value
 

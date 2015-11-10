@@ -19,53 +19,67 @@ def alpha_beta(player, board, depth, alpha, beta):
         if board.turn == player:    # 自分の手番
             if board.isTried(1): return 5000
 
-            searchList = []
             for i in range(12):
-                if board.board[i] is None or board.turn != board.board[i].player: continue
+                if board.board[i] is None or board.board[i].player != player: continue
 
                 ret = board.movablePlace(i)
                 for x in ret:
-                    bd = copy.deepcopy(board)
-                    bd.move(i, x)
-                    if board.isCatchedLion(board.turn): return 5000
-                    searchList.append(bd)
+                    captured = board.move(i, x)
+                    if board.isCatchedLion(1):
+                        board.restore_move(x, i, captured)
+                        return 5000
+
+                    board.turn = 2
+                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 1
+                    board.restore_move(x, i, captured);
+                    if alpha >= beta: return beta
 
             for i, p in enumerate(board.capturedPiece1):
-                 for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
+                for j in range(12):
+                    if board.board[j] is not None: continue
 
-            for bd in searchList:
-                bd.turn = bd.turn%2 + 1
-                alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-                if alpha >= beta: return beta
+                    board.c_move(i, p, j)
+                    board.turn = 2
+                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 1
+                    board.c_restore_move(j, i)
+                    if alpha >= beta: return beta
                 
             return alpha
                 
         else:                       # 相手の手番
             if board.isTried(2): return -5000
-            
-            searchList = []
+
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
                 ret = board.movablePlace(i)
                 for x in ret:
-                    bd = copy.deepcopy(board)
-                    bd.move(i, x)
-                    if bd.isCatchedLion(bd.turn): return -5000
-                    searchList.append(bd)
+                    captured = board.move(i, x);
+                    if board.isCatchedLion(2):
+                        board.restore_move(x, i, captured)
+                        return -5000
+
+                    board.turn = 1
+                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 2
+                    
+                    board.restore_move(x, i, captured)
+                    if alpha >= beta: return alpha
 
             for i, p in enumerate(board.capturedPiece2):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    searchList.append(bd)
-
-            for bd in searchList:
-                bd.turn = bd.turn%2 + 1
-                beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
-                if alpha >= beta: return alpha
+                for j in range(12):
+                    if board.board[j] is not None: continue
+                    
+                    board.c_move(i, p, j)
+                    
+                    board.turn = 1
+                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 2
+                    
+                    board.c_restore_move(j, i)
+                    if alpha >= beta: return alpha
                     
             return beta
 
@@ -74,55 +88,70 @@ def alpha_beta(player, board, depth, alpha, beta):
         if board.turn == player:    # 自分の手番
             if board.isTried(2): return -5000
             
-            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
                 ret = board.movablePlace(i)
                 for x in ret:
-                    bd = copy.deepcopy(board)
-                    bd.move(i, x)
-                    if bd.isCatchedLion(bd.turn): return -5000
-                    searchList.append(bd)
+                    captured = board.move(i, x)
+                    if board.isCatchedLion(2):
+                        board.restore_move(x, i, captured)
+                        return -5000
+
+                    board.turn = 1
+                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 2
+
+                    board.restore_move(x, i, captured)
+                    if alpha >= beta: return alpha
 
             for i, p in enumerate(board.capturedPiece2):
-                 for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    searchList.append(bd)
+                for j in range(12):
+                    if board.board[j] is not None: continue
+                    
+                    board.c_move(i, p, j)
 
-            for bd in searchList:
-                bd.turn = bd.turn%2 + 1
-                beta = min(beta, alpha_beta(player, bd, depth-1, alpha, beta))
-                if alpha >= beta: return alpha
+                    board.turn = 1
+                    beta = min(beta, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 2
+
+                    board.c_restore_move(j, i)
+                    if alpha >= beta: return alpha
 
             return beta
 
         else:                       # 相手の手番
             if board.isTried(1): return 5000
             
-            searchList = []
             for i in range(12):
                 if board.board[i] is None or board.turn != board.board[i].player: continue
 
                 ret = board.movablePlace(i)
                 for x in ret:
-                    bd = copy.deepcopy(board)
-                    bd.move(i, x)
-                    if bd.isCatchedLion(bd.turn): return 5000
-                    searchList.append(bd)
+                    captured = board.move(i, x)
+                    if board.isCatchedLion(1):
+                        board.restore_move(x, i, captured)
+                        return 5000
+
+                    board.turn = 2
+                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 1
+
+                    board.restore_move(x, i, captured)
+                    if alpha >= beta: return beta
 
             for i, p in enumerate(board.capturedPiece2):
-                for dst in board.notOnBoard:
-                    bd = copy.deepcopy(board)
-                    bd.c_move(i, p, ban.Board.str2index[dst])
-                    searchList.append(bd)
+                for j in range(12):
+                    if board.board[j] is not None: continue
+                    
+                    board.c_move(i, p, j)
 
+                    board.turn = 2
+                    alpha = max(alpha, alpha_beta(player, board, depth-1, alpha, beta))
+                    board.turn = 1
 
-            for bd in searchList:
-                bd.turn = bd.turn%2 + 1
-                alpha = max(alpha, alpha_beta(player, bd, depth-1, alpha, beta))
-                if alpha >= beta: return beta
+                    board.c_restore_move(j, i)
+                    if alpha >= beta: return beta
                     
             return alpha
         
@@ -161,7 +190,9 @@ def first_search(player, board):
                 searchList.append(tuple([bd, "D"+str(i+1), dst]))
 
         for bd in searchList:
-            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
+            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
+                s_result = alpha_beta(player, bd[0], 3, -9999, 9999)
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
             else:
                 s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
@@ -180,8 +211,7 @@ def first_search(player, board):
                 ret_board = bd
                 print(ret_board)
 
-            if time.time() - start > 120:
-                return ret_board
+            if time.time() - start > 120: break        
     else:
         for i, p in enumerate(board.capturedPiece2):
             for dst in board.notOnBoard:
@@ -190,7 +220,9 @@ def first_search(player, board):
                 searchList.append(tuple([bd, "E"+str(i+1), dst]))
 
         for bd in searchList:
-            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
+            if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
+                s_result = alpha_beta(player, bd[0], 3, -9999, 9999)
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta(player, bd[0], 4, -9999, 9999)
             else:
                 s_result = alpha_beta(player, bd[0], 6, -9999, 9999)
@@ -209,12 +241,11 @@ def first_search(player, board):
                 ret_board = bd
                 print(ret_board)
 
-            if time.time() - start > 120: # 2分を超えていたら強制的に探索を打ち切る
-                return ret_board
+            if time.time() - start > 120: break # 2分を超えていたら強制的に探索を打ち切る
 
     elapsed_time = time.time() - start
     print()
-    print("# elapsed_time:{0}".format(elapsed_time) + "[sec]")
+    print("# elapsed_time:{0}[sec]".format(elapsed_time))
     
     return ret_board
 
