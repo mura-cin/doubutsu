@@ -13,24 +13,29 @@ class Chick(Piece):
 
     def __init__(self, player):
         super(Chick, self).__init__(player)
-        if player == 1:
-            self.nextMove = [
+
+    def retValue(self):
+        return Chick.VAL
+
+    def getNextMove(self):
+        if self.player == 1:
+            nextMove = [
                 [], [], [],
                 [0],[1],[2],
                 [3],[4],[5],
                 [6],[7],[8],
             ]
-            
+
         else:
-            self.nextMove = [
+            nextMove = [
                 [3], [4], [5],
                 [6], [7], [8],
                 [9], [10], [11],
                 [], [], [],
             ]
 
-    def retValue(self):
-        return Chick.VAL
+        return nextMove
+
         
     def __str__(self):
         if self.player == 1:
@@ -50,8 +55,13 @@ class Hen(Piece):
 
     def __init__(self, player):
         super(Hen, self).__init__(player)
-        if player == 1:
-            self.nextMove = [
+
+    def retValue(self):
+        return Hen.VAL
+
+    def getNextMove(self):
+        if self.player == 1:
+            nextMove = [
                 [1,3],
                 [0,2,4],
                 [1,5],
@@ -66,7 +76,7 @@ class Hen(Piece):
                 [7,8,10],
             ]
         else:
-            self.nextMove = [
+            nextMove = [
                 [1,3,4],
                 [0,2,3,4,5],
                 [1,4,5],
@@ -81,8 +91,7 @@ class Hen(Piece):
                 [8,10],
             ]
 
-    def retValue(self):
-        return Hen.VAL
+        return nextMove
 
     def __str__(self):
         if self.player == 1:
@@ -120,6 +129,10 @@ class Elephant(Piece):
     def retValue(self):
         return Elephant.VAL
 
+    def getNextMove(self):
+        return self.nextMove
+            
+
     def __str__(self):
         if self.player == 1:
             return "ぞ"
@@ -156,6 +169,9 @@ class Giraffe(Piece):
     def retValue(self):
         return Giraffe.VAL
 
+    def getNextMove(self):
+        return self.nextMove
+
     def __str__(self):
         if self.player == 1:
             return "き"
@@ -191,6 +207,9 @@ class Lion(Piece):
 
     def retValue(self):
         return Lion.VAL
+
+    def getNextMove(self):
+        return self.nextMove
 
     def __str__(self):
         if self.player == 1:

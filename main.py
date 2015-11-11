@@ -11,14 +11,14 @@ serverName = "localhost"
 serverPort = 4444
 
 # プレイヤー1の場合
-def alpha_beta1(board, depth, alpha, beta):
+def alpha_beta1(turn, board, depth, alpha, beta):
     if depth <= 0: return board.calcBoard()
 
-    if board.turn == player:    # 自分の手番
+    if turn:    # 自分の手番
         if board.isTried(1): return 5000
 
         for i in range(12):
-            if board.board[i] is None or board.board[i].player != player: continue
+            if board.board[i] is None or board.board[i].player != 1: continue
 
             ret = board.movablePlace(i)
             for x in ret:
@@ -27,10 +27,7 @@ def alpha_beta1(board, depth, alpha, beta):
                     board.restore_move(x, i, captured)
                     return 5000
 
-                board.turn = 2
-                alpha = max(alpha, alpha_beta1(board, depth-1, alpha, beta))
-                board.turn = 1
-
+                alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return beta
 
@@ -39,9 +36,7 @@ def alpha_beta1(board, depth, alpha, beta):
                 if board.board[j] is not None: continue
 
                 board.c_move(i, p, j)
-                board.turn = 2
-                alpha = max(alpha, alpha_beta1(board, depth-1, alpha, beta))
-                board.turn = 1
+                alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return beta
                 
@@ -51,7 +46,7 @@ def alpha_beta1(board, depth, alpha, beta):
         if board.isTried(2): return -5000
 
         for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
+            if board.board[i] is None or board.board[i].player != 2: continue
 
             ret = board.movablePlace(i)
             for x in ret:
@@ -60,10 +55,7 @@ def alpha_beta1(board, depth, alpha, beta):
                     board.restore_move(x, i, captured)
                     return -5000
 
-                board.turn = 1
-                beta = min(beta, alpha_beta1(board, depth-1, alpha, beta))
-                board.turn = 2
-                    
+                beta = min(beta, alpha_beta1(not turn, board, depth-1, alpha, beta))
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return alpha
 
@@ -73,9 +65,7 @@ def alpha_beta1(board, depth, alpha, beta):
                     
                 board.c_move(i, p, j)
                     
-                board.turn = 1
-                beta = min(beta, alpha_beta1(board, depth-1, alpha, beta))
-                board.turn = 2
+                beta = min(beta, alpha_beta1(not turn, board, depth-1, alpha, beta))
                     
                 board.c_restore_move(j, i)
                 if alpha >= beta: return alpha
@@ -83,14 +73,14 @@ def alpha_beta1(board, depth, alpha, beta):
         return beta
 
 # プレイヤー2の時
-def alpha_beta2(board, depth, alpha, beta):
+def alpha_beta2(turn, board, depth, alpha, beta):
     if depth <= 0: return board.calcBoard()
     
-    if board.turn == player:    # 自分の手番
+    if turn:                    # 自分の手番
         if board.isTried(2): return -5000
             
         for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
+            if board.board[i] is None or board.board[i].player != 2: continue
 
             ret = board.movablePlace(i)
             for x in ret:
@@ -99,10 +89,7 @@ def alpha_beta2(board, depth, alpha, beta):
                     board.restore_move(x, i, captured)
                     return -5000
 
-                board.turn = 1
-                beta = min(beta, alpha_beta2(board, depth-1, alpha, beta))
-                board.turn = 2
-
+                beta = min(beta, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return alpha
 
@@ -111,11 +98,7 @@ def alpha_beta2(board, depth, alpha, beta):
                 if board.board[j] is not None: continue
                 
                 board.c_move(i, p, j)
-
-                board.turn = 1
-                beta = min(beta, alpha_beta2(board, depth-1, alpha, beta))
-                board.turn = 2
-
+                beta = min(beta, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return alpha
 
@@ -125,7 +108,7 @@ def alpha_beta2(board, depth, alpha, beta):
         if board.isTried(1): return 5000
             
         for i in range(12):
-            if board.board[i] is None or board.turn != board.board[i].player: continue
+            if board.board[i] is None or board.board[i].player != 1: continue
 
             ret = board.movablePlace(i)
             for x in ret:
@@ -134,10 +117,7 @@ def alpha_beta2(board, depth, alpha, beta):
                     board.restore_move(x, i, captured)
                     return 5000
 
-                board.turn = 2
-                alpha = max(alpha, alpha_beta2(board, depth-1, alpha, beta))
-                board.turn = 1
-
+                alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return beta
 
@@ -146,11 +126,7 @@ def alpha_beta2(board, depth, alpha, beta):
                 if board.board[j] is not None: continue
                     
                 board.c_move(i, p, j)
-
-                board.turn = 2
-                alpha = max(alpha, alpha_beta2(board, depth-1, alpha, beta))
-                board.turn = 1
-
+                alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return beta
                     
@@ -162,7 +138,7 @@ def first_search(player, board):
     start = time.time()
     
     ret_board = None
-    board.turn = player%2 + 1  # first_searchで一回動かしてからalpha_betaに投げるので1->2 or 2->1にする
+    board.turn = player
     val = 0
 
     if player == 1:
@@ -185,18 +161,20 @@ def first_search(player, board):
 
     if player == 1:
         for i, p in enumerate(board.capturedPiece1):
-            for dst in board.notOnBoard:
+            for j in range(12):
+                if board.board[j] is not None: continue
+                
                 bd = copy.deepcopy(board)
-                bd.c_move(i, p, ban.Board.str2index[dst])
-                searchList.append(tuple([bd, "D"+str(i+1), dst]))
+                bd.c_move(i, p, j)
+                searchList.append(tuple([bd, "D"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta1(bd[0], 4, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta1(bd[0], 5, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta1(bd[0], 6, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -215,18 +193,20 @@ def first_search(player, board):
             if time.time() - start > 120: break        
     else:
         for i, p in enumerate(board.capturedPiece2):
-            for dst in board.notOnBoard:
+            for j in range(12):
+                if board.board[j] is not None: continue
+                
                 bd = copy.deepcopy(board)
-                bd.c_move(i, p, ban.Board.str2index[dst])
-                searchList.append(tuple([bd, "E"+str(i+1), dst]))
+                bd.c_move(i, p, j)
+                searchList.append(tuple([bd, "E"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta2(bd[0], 4, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta2(bd[0], 5, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta2(bd[0], 6, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -339,21 +319,6 @@ while True:
     
     board.turn = player
     board.showBoard()
-
-    # if board.calcBoard() > 1000:
-    #     print("Player1 win!")
-    #     input("")
-    #     break
-    # if board.calcBoard() < -1000:
-    #     print("Player2 win!")
-    #     input("")
-    #     break
-
-    # # トライしているか
-    # if board.isTried(player):
-    #     print("Player" + str(player) + " lion is tried!")
-    #     input("")
-    #     break
 
     prevBoard, src, dst = first_search(player, board)
 

@@ -92,7 +92,7 @@ class Board:
     # 動ける場所のインデックスのリストを返す
     def movablePlace(self, src):
         ret = []
-        for dst in self.board[src].nextMove[src]:
+        for dst in self.board[src].getNextMove()[src]:
             if self.board[dst] is None \
                     or self.board[src].player != self.board[dst].player:
                 ret.append(dst)
