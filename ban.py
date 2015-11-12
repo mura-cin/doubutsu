@@ -176,11 +176,11 @@ class Board:
         # 相手の駒をとっていた場合
         if captured:
             if self.board[si].player == 1:
-                self.capturedPiece1[-1].player = 2
                 self.board[di] = self.capturedPiece1.pop(-1)
+                self.board[di].changePlayer()
             else:
-                self.capturedPiece2[-1].player = 1
                 self.board[di] = self.capturedPiece2.pop(-1)
+                self.board[di].changePlayer()
         else:
             self.board[di] = None
             
@@ -190,6 +190,10 @@ class Board:
         if p.player == 1:
             self.capturedPiece1.pop(ci)
         else:
+            # print("ci={0}, p={1}, di={2}".format(ci, p, di))
+            # print("p.player = " + str(p.player))
+            # self.showBoard()
+            # print("capturedPiece2: " + str(self.capturedPiece2))
             self.capturedPiece2.pop(ci)
         self.board[di] = p
 

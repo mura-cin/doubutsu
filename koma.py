@@ -6,6 +6,12 @@ class Piece():
 
     def retValue(self):
         raise NotImplementedError
+
+    def changePlayer(self):
+        if self.player == 1:
+            self.player = 2
+        else:
+            self.player = 1
         
 class Chick(Piece):
 

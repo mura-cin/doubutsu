@@ -31,11 +31,11 @@ def alpha_beta1(turn, board, depth, alpha, beta):
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return beta
 
-        for i, p in enumerate(board.capturedPiece1):
+        for i in range(len(board.capturedPiece1)):
             for j in range(12):
                 if board.board[j] is not None: continue
 
-                board.c_move(i, p, j)
+                board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return beta
@@ -59,14 +59,12 @@ def alpha_beta1(turn, board, depth, alpha, beta):
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return alpha
 
-        for i, p in enumerate(board.capturedPiece2):
+        for i in range(len(board.capturedPiece2)):
             for j in range(12):
                 if board.board[j] is not None: continue
-                    
-                board.c_move(i, p, j)
-                    
+
+                board.c_move(i, board.capturedPiece2[i], j)
                 beta = min(beta, alpha_beta1(not turn, board, depth-1, alpha, beta))
-                    
                 board.c_restore_move(j, i)
                 if alpha >= beta: return alpha
                     
@@ -93,11 +91,11 @@ def alpha_beta2(turn, board, depth, alpha, beta):
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return alpha
 
-        for i, p in enumerate(board.capturedPiece2):
+        for i in range(len(board.capturedPiece2)):
             for j in range(12):
                 if board.board[j] is not None: continue
                 
-                board.c_move(i, p, j)
+                board.c_move(i, board.capturedPiece2[i], j)
                 beta = min(beta, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return alpha
@@ -121,11 +119,11 @@ def alpha_beta2(turn, board, depth, alpha, beta):
                 board.restore_move(x, i, captured)
                 if alpha >= beta: return beta
 
-        for i, p in enumerate(board.capturedPiece2):
+        for i in range(len(board.capturedPiece1)):
             for j in range(12):
                 if board.board[j] is not None: continue
                     
-                board.c_move(i, p, j)
+                board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
                 if alpha >= beta: return beta
@@ -170,11 +168,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta1(False, bd[0], 4, -9999, 9999)
-            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
-            else:
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta1(False, bd[0], 6, -9999, 9999)
+            else:
+                s_result = alpha_beta1(False, bd[0], 7, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -202,11 +200,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta2(False, bd[0], 4, -9999, 9999)
-            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta2(False, bd[0], 5, -9999, 9999)
-            else:
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta2(False, bd[0], 6, -9999, 9999)
+            else:
+                s_result = alpha_beta2(False, bd[0], 7, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
