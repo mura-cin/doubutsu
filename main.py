@@ -38,6 +38,7 @@ def alpha_beta1(turn, board, depth, alpha, beta):
                 board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
                 board.c_restore_move(j, i)
+
                 if alpha >= beta: return beta
                 
         return alpha
@@ -158,15 +159,17 @@ def first_search(player, board):
             searchList.append(tuple([bd, ban.Board.index2str[i], ban.Board.index2str[x]]))
 
     if player == 1:
-        for i, p in enumerate(board.capturedPiece1):
+        for i in range(len(board.capturedPiece1)):
             for j in range(12):
                 if board.board[j] is not None: continue
                 
                 bd = copy.deepcopy(board)
-                bd.c_move(i, p, j)
+                bd.c_move(i, board.capturedPiece1[i], j)
                 searchList.append(tuple([bd, "D"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
+            print("探索前:")
+            bd[0].showBoard()
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
                 s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
@@ -190,12 +193,12 @@ def first_search(player, board):
 
             if time.time() - start > 120: break        
     else:
-        for i, p in enumerate(board.capturedPiece2):
+        for i in range(len(board.capturedPiece2)):
             for j in range(12):
                 if board.board[j] is not None: continue
                 
                 bd = copy.deepcopy(board)
-                bd.c_move(i, p, j)
+                bd.c_move(i, board.capturedPiece2[i], j)
                 searchList.append(tuple([bd, "E"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
@@ -242,9 +245,6 @@ def isCheating(prevBoard, recvBoard):
         if isMatchBoard(recvBoard.board, x): return False
         
     return True
-
-
-
 
 BUFSIZE = 1024
 

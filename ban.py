@@ -75,19 +75,6 @@ class Board:
                 elif k[0] == 'l':
                     self.capturedPiece2.append(koma.Lion(2))
 
-    def __str__(self):
-        line = ""
-        for i in range(12):
-            if self.board[i] is None:
-                line += "--"
-                continue
-            line += str(self.board[i])
-        for x in self.capturedPiece1:
-            line += str(x)
-        for x in self.capturedPiece2:
-            line += str(x)
-
-        return line
 
     # 動ける場所のインデックスのリストを返す
     def movablePlace(self, src):
@@ -112,20 +99,20 @@ class Board:
                 ret.append(bd.board)
 
         if self.turn == 1:
-            for i, p in enumerate(self.capturedPiece1):
+            for i in range(len(self.capturedPiece1)):
                 for j in range(12):
                     if self.board[j] is not None: continue
 
                     bd = copy.deepcopy(self)
-                    bd.c_move(i, p, j)
+                    bd.c_move(i, self.capturedPiece1[i], j)
                     ret.append(bd.board)
         else:
-            for i, p in enumerate(self.capturedPiece2):
+            for i in range(len(self.capturedPiece2)):
                 for j in range(12):
                     if self.board[j] is not None: continue
 
                     bd = copy.deepcopy(self)
-                    bd.c_move(i, p, j)
+                    bd.c_move(i, self.capturedPiece2[i], j)
                     ret.append(bd.board)
         return ret
 
@@ -137,23 +124,23 @@ class Board:
         if self.board[di] is not None:
             flag = True
             if self.board[si].player == 1:
-                self.board[di].player = 1
-                self.capturedPiece1.append(self.board[di])
+                self.capturedPiece1.append(copy.copy(self.board[di]))
+                self.capturedPiece1[-1].player = 1
             else:
-                self.board[di].player = 2
-                self.capturedPiece2.append(self.board[di])
+                self.capturedPiece2.append(copy.copy(self.board[di]))
+                self.capturedPiece2[-1].player = 2
 
         # ひよこ -> にわとりの処理
         if self.board[si].player == 1:
             if isinstance(self.board[si], koma.Chick) and 0 <= di <= 2:
                 self.board[di] = koma.Hen(1)
             else:
-                self.board[di] = self.board[si]
+                self.board[di] = copy.copy(self.board[si])
         else:
             if isinstance(self.board[si], koma.Chick) and 9 <= di <= 11:
                 self.board[di] = koma.Hen(2)
             else:
-                self.board[di] = self.board[si]
+                self.board[di] = copy.copy(self.board[si])
 
         self.board[si] = None
 
@@ -166,12 +153,12 @@ class Board:
             if isinstance(self.board[di], koma.Hen) and 0 <= di <= 2:
                 self.board[si] = koma.Chick(1)
             else:
-                self.board[si] = self.board[di]
+                self.board[si] = copy.copy(self.board[di])
         else:
             if isinstance(self.board[di], koma.Hen) and 9 <= di <= 11:
                 self.board[si] = koma.Chick(2)
             else:
-                self.board[si] = self.board[di]
+                self.board[si] = copy.copy(self.board[di])
 
         # 相手の駒をとっていた場合
         if captured:
@@ -188,21 +175,16 @@ class Board:
     # 持ち駒を動かす(持ち駒のindex, 移動先のindex)
     def c_move(self, ci, p, di):
         if p.player == 1:
-            self.capturedPiece1.pop(ci)
+            self.board[di] = self.capturedPiece1.pop(ci)
         else:
-            # print("ci={0}, p={1}, di={2}".format(ci, p, di))
-            # print("p.player = " + str(p.player))
-            # self.showBoard()
-            # print("capturedPiece2: " + str(self.capturedPiece2))
-            self.capturedPiece2.pop(ci)
-        self.board[di] = p
+            self.board[di] = self.capturedPiece2.pop(ci)
 
     # 持ち駒を動かしたのを復元する関数
     def c_restore_move(self, di, ci):
         if self.board[di].player == 1:
-            self.capturedPiece1.insert(ci, self.board[di])
+            self.capturedPiece1.insert(ci, copy.copy(self.board[di]))
         else:
-            self.capturedPiece2.insert(ci, self.board[di])
+            self.capturedPiece2.insert(ci, copy.copy(self.board[di]))
         self.board[di] = None
 
     # playerのライオンがトライしているか
