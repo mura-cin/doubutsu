@@ -22,13 +22,13 @@ def alpha_beta1(turn, board, depth, alpha, beta):
 
             ret = board.movablePlace(i)
             for x in ret:
-                captured = board.move(i, x)
+                board.move(i, x)
                 if board.isCatchedLion(1):
-                    board.restore_move(x, i, captured)
+                    board.restore_move()
                     return 5000
 
                 alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
-                board.restore_move(x, i, captured)
+                board.restore_move()
                 if alpha >= beta: return beta
 
         for i in range(len(board.capturedPiece1)):
@@ -37,10 +37,10 @@ def alpha_beta1(turn, board, depth, alpha, beta):
 
                 board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta1(not turn, board, depth-1, alpha, beta))
-                board.c_restore_move(j, i)
+                board.restore_move()
 
                 if alpha >= beta: return beta
-                
+
         return alpha
                 
     else:                       # 相手の手番
@@ -51,13 +51,13 @@ def alpha_beta1(turn, board, depth, alpha, beta):
 
             ret = board.movablePlace(i)
             for x in ret:
-                captured = board.move(i, x);
+                board.move(i, x)
                 if board.isCatchedLion(2):
-                    board.restore_move(x, i, captured)
+                    board.restore_move()
                     return -5000
 
                 beta = min(beta, alpha_beta1(not turn, board, depth-1, alpha, beta))
-                board.restore_move(x, i, captured)
+                board.restore_move()
                 if alpha >= beta: return alpha
 
         for i in range(len(board.capturedPiece2)):
@@ -66,7 +66,7 @@ def alpha_beta1(turn, board, depth, alpha, beta):
 
                 board.c_move(i, board.capturedPiece2[i], j)
                 beta = min(beta, alpha_beta1(not turn, board, depth-1, alpha, beta))
-                board.c_restore_move(j, i)
+                board.restore_move()
                 if alpha >= beta: return alpha
                     
         return beta
@@ -83,13 +83,13 @@ def alpha_beta2(turn, board, depth, alpha, beta):
 
             ret = board.movablePlace(i)
             for x in ret:
-                captured = board.move(i, x)
+                board.move(i, x)
                 if board.isCatchedLion(2):
-                    board.restore_move(x, i, captured)
+                    board.restore_move()
                     return -5000
 
                 beta = min(beta, alpha_beta2(not turn, board, depth-1, alpha, beta))
-                board.restore_move(x, i, captured)
+                board.restore_move()
                 if alpha >= beta: return alpha
 
         for i in range(len(board.capturedPiece2)):
@@ -98,7 +98,7 @@ def alpha_beta2(turn, board, depth, alpha, beta):
                 
                 board.c_move(i, board.capturedPiece2[i], j)
                 beta = min(beta, alpha_beta2(not turn, board, depth-1, alpha, beta))
-                board.c_restore_move(j, i)
+                board.restore_move()
                 if alpha >= beta: return alpha
 
         return beta
@@ -111,13 +111,13 @@ def alpha_beta2(turn, board, depth, alpha, beta):
 
             ret = board.movablePlace(i)
             for x in ret:
-                captured = board.move(i, x)
+                board.move(i, x)
                 if board.isCatchedLion(1):
-                    board.restore_move(x, i, captured)
+                    board.restore_move()
                     return 5000
 
                 alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
-                board.restore_move(x, i, captured)
+                board.restore_move()
                 if alpha >= beta: return beta
 
         for i in range(len(board.capturedPiece1)):
@@ -126,7 +126,7 @@ def alpha_beta2(turn, board, depth, alpha, beta):
                     
                 board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
-                board.c_restore_move(j, i)
+                board.restore_move()
                 if alpha >= beta: return beta
                     
         return alpha
@@ -156,7 +156,7 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
             if bd.isCatchedLion(player): return (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-            searchList.append(tuple([bd, ban.Board.index2str[i], ban.Board.index2str[x]]))
+            searchList.append([bd, ban.Board.index2str[i], ban.Board.index2str[x]])
 
     if player == 1:
         for i in range(len(board.capturedPiece1)):
@@ -165,22 +165,20 @@ def first_search(player, board):
                 
                 bd = copy.deepcopy(board)
                 bd.c_move(i, board.capturedPiece1[i], j)
-                searchList.append(tuple([bd, "D"+str(i+1), ban.Board.index2str[j]]))
+                searchList.append([bd, "D"+str(i+1), ban.Board.index2str[j]])
 
         for bd in searchList:
-            print("探索前:")
-            bd[0].showBoard()
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta1(False, bd[0], 6, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta1(False, bd[0], 7, -9999, 9999)
+                s_result = alpha_beta1(False, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
             if s_result == 5000:
-                return bd
+                return tuple(bd)
 
             if s_result == val:
                 if random.randint(1, 2) == 1:
@@ -199,15 +197,15 @@ def first_search(player, board):
                 
                 bd = copy.deepcopy(board)
                 bd.c_move(i, board.capturedPiece2[i], j)
-                searchList.append(tuple([bd, "E"+str(i+1), ban.Board.index2str[j]]))
+                searchList.append([bd, "E"+str(i+1), ban.Board.index2str[j]])
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta2(False, bd[0], 5, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 4, -9999, 9999)
             elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
-                s_result = alpha_beta2(False, bd[0], 6, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 5, -9999, 9999)
             else:
-                s_result = alpha_beta2(False, bd[0], 7, -9999, 9999)
+                s_result = alpha_beta2(False, bd[0], 6, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -229,7 +227,7 @@ def first_search(player, board):
     print()
     print("# elapsed_time:{0}[sec]".format(elapsed_time))
     
-    return ret_board
+    return tuple(ret_board)
 
 def isMatchBoard(b1, b2):
     for i in range(12):

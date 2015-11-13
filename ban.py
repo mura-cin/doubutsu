@@ -14,7 +14,7 @@ D -> プレイヤー1の持ち駒
 
 import koma
 import copy
-
+import collections
 
 class Board:
     str2index = {x: i for i, x in enumerate([chr(ord('A') + x) + str(y)
@@ -32,6 +32,8 @@ class Board:
         self.notOnBoard = []  # 駒が置かれていない座標
         self.capturedPiece1 = []  # プレイヤー1の持ち駒
         self.capturedPiece2 = []  # プレイヤー2の持ち駒
+        # (使ったメソッド, 動かす前のインデックス, 動かした先のインデックス, 動かす前の駒, 動かした先の駒)
+        self.moveHistory = collections.deque() # 指し手の履歴
 
         for i in range(12):
             c, k = bd[i].split(" ")
@@ -119,18 +121,26 @@ class Board:
     # 盤上の駒を動かす
     # 相手のコマを取った場合にはTrueを返す
     def move(self, si, di):
-        flag = False
-        
-        if self.board[di] is not None:
-            flag = True
-            if self.board[si].player == 1:
-                self.capturedPiece1.append(copy.copy(self.board[di]))
-                self.capturedPiece1[-1].player = 1
-            else:
-                self.capturedPiece2.append(copy.copy(self.board[di]))
-                self.capturedPiece2[-1].player = 2
+        self.moveHistory.appendleft(tuple(["move", si, di, copy.deepcopy(self.board[si]), \
+                                           copy.deepcopy(self.board[di])]))
 
-        # ひよこ -> にわとりの処理
+        # 駒を取る時
+        if self.board[di] is not None:
+            if self.board[si].player == 1:
+                # 取る駒がニワトリの時
+                if isinstance(self.board[di], koma.Hen):
+                    self.capturedPiece1.append(koma.Chick(1))
+                else:
+                    self.capturedPiece1.append(copy.copy(self.board[di]))
+                    self.capturedPiece1[-1].player = 1
+            else:
+                if isinstance(self.board[di], koma.Hen):
+                    self.capturedPiece2.append(koma.Chick(2))
+                else:
+                    self.capturedPiece2.append(copy.copy(self.board[di]))
+                    self.capturedPiece2[-1].player = 2
+
+        # 駒を動かす時
         if self.board[si].player == 1:
             if isinstance(self.board[si], koma.Chick) and 0 <= di <= 2:
                 self.board[di] = koma.Hen(1)
@@ -144,36 +154,28 @@ class Board:
 
         self.board[si] = None
 
-        return flag
-
     # moveで動かしたのを復元する関数
-    def restore_move(self, di, si, captured):
-        # にわとり -> ひよこの処理
-        if self.board[di].player == 1:
-            if isinstance(self.board[di], koma.Hen) and 0 <= di <= 2:
-                self.board[si] = koma.Chick(1)
-            else:
-                self.board[si] = copy.copy(self.board[di])
-        else:
-            if isinstance(self.board[di], koma.Hen) and 9 <= di <= 11:
-                self.board[si] = koma.Chick(2)
-            else:
-                self.board[si] = copy.copy(self.board[di])
+    def restore_move(self):
+        func, si, di, sp, dp = self.moveHistory.popleft()
 
-        # 相手の駒をとっていた場合
-        if captured:
-            if self.board[si].player == 1:
-                self.board[di] = self.capturedPiece1.pop(-1)
-                self.board[di].changePlayer()
-            else:
-                self.board[di] = self.capturedPiece2.pop(-1)
-                self.board[di].changePlayer()
+        if func == "move":
+            self.board[si] = sp
+            self.board[di] = dp
+            if dp is not None:  # 動かした先に駒があった場合
+                if sp.player == 1:
+                    self.capturedPiece1.pop(-1)
+                else:
+                    self.capturedPiece2.pop(-1)
         else:
+            if sp.player == 1:
+                self.capturedPiece1.insert(si, sp)
+            else:
+                self.capturedPiece2.insert(si, sp)
             self.board[di] = None
-            
 
     # 持ち駒を動かす(持ち駒のindex, 移動先のindex)
     def c_move(self, ci, p, di):
+        self.moveHistory.appendleft(tuple(["c_move", ci, di, copy.deepcopy(p), None]))
         if p.player == 1:
             self.board[di] = self.capturedPiece1.pop(ci)
         else:
