@@ -139,6 +139,8 @@ def first_search(player, board):
     ret_board = None
     board.turn = player
     val = 0
+    winFlag = False
+    nextMoveList = []
 
     if player == 1:
         val = -9999
@@ -178,7 +180,8 @@ def first_search(player, board):
             bd[0].showBoard()
 
             if s_result == 5000:
-                return tuple(bd)
+                winFlag = True
+                nextMoveList.append(tuple(bd))
 
             if s_result == val:
                 if random.randint(1, 2) == 1:
@@ -210,7 +213,8 @@ def first_search(player, board):
             bd[0].showBoard()
 
             if s_result == -5000:
-                return bd
+                winFlag = True
+                nextMoveList.append(tuple(bd))
 
             if s_result == val:
                 if random.randint(1, 2) == 1:
@@ -226,6 +230,9 @@ def first_search(player, board):
     elapsed_time = time.time() - start
     print()
     print("# elapsed_time:{0}[sec]".format(elapsed_time))
+
+    if winFlag:
+        return random.choice(nextMoveList)
     
     return tuple(ret_board)
 

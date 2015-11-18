@@ -29,7 +29,6 @@ class Board:
 
         self.board = []  # 盤面情報
         self.turn = 1  # 手番
-        self.notOnBoard = []  # 駒が置かれていない座標
         self.capturedPiece1 = []  # プレイヤー1の持ち駒
         self.capturedPiece2 = []  # プレイヤー2の持ち駒
         # (使ったメソッド, 動かす前のインデックス, 動かした先のインデックス, 動かす前の駒, 動かした先の駒)
@@ -49,7 +48,6 @@ class Board:
                 self.board.append(koma.Lion(int(k[1])))
             else:  # 何もない
                 self.board.append(None)
-                self.notOnBoard.append(c)
 
         for x in bd:
             c, k = x.split(" ")
@@ -180,14 +178,6 @@ class Board:
             self.board[di] = self.capturedPiece1.pop(ci)
         else:
             self.board[di] = self.capturedPiece2.pop(ci)
-
-    # 持ち駒を動かしたのを復元する関数
-    def c_restore_move(self, di, ci):
-        if self.board[di].player == 1:
-            self.capturedPiece1.insert(ci, copy.copy(self.board[di]))
-        else:
-            self.capturedPiece2.insert(ci, copy.copy(self.board[di]))
-        self.board[di] = None
 
     # playerのライオンがトライしているか
     def isTried(self, player):
