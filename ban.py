@@ -119,8 +119,8 @@ class Board:
     # 盤上の駒を動かす
     # 相手のコマを取った場合にはTrueを返す
     def move(self, si, di):
-        self.moveHistory.appendleft(tuple(["move", si, di, copy.deepcopy(self.board[si]), \
-                                           copy.deepcopy(self.board[di])]))
+        self.moveHistory.appendleft(tuple(["move", si, di, copy.copy(self.board[si]), \
+                                           copy.copy(self.board[di])]))
 
         # 駒を取る時
         if self.board[di] is not None:
@@ -173,7 +173,7 @@ class Board:
 
     # 持ち駒を動かす(持ち駒のindex, 移動先のindex)
     def c_move(self, ci, p, di):
-        self.moveHistory.appendleft(tuple(["c_move", ci, di, copy.deepcopy(p), None]))
+        self.moveHistory.appendleft(tuple(["c_move", ci, di, copy.copy(p), None]))
         if p.player == 1:
             self.board[di] = self.capturedPiece1.pop(ci)
         else:

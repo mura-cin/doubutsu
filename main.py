@@ -6,8 +6,8 @@ import copy
 import random
 import ban
 
-serverName = "localhost"
-#serverName = "10.2.72.149"
+#serverName = "localhost"
+serverName = "10.2.77.149"
 serverPort = 4444
 
 # プレイヤー1の場合
@@ -171,11 +171,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta1(False, bd[0], 4, -9999, 9999)
-            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta1(False, bd[0], 5, -9999, 9999)
-            else:
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta1(False, bd[0], 6, -9999, 9999)
+            else:
+                s_result = alpha_beta1(False, bd[0], 7, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
@@ -204,11 +204,11 @@ def first_search(player, board):
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
-                s_result = alpha_beta2(False, bd[0], 4, -9999, 9999)
-            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta2(False, bd[0], 5, -9999, 9999)
-            else:
+            elif (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 3:
                 s_result = alpha_beta2(False, bd[0], 6, -9999, 9999)
+            else:
+                s_result = alpha_beta2(False, bd[0], 7, -9999, 9999)
             print("評価値：" + str(s_result))
             bd[0].showBoard()
 
