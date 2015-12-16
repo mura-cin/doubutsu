@@ -6,8 +6,8 @@ import copy
 import random
 import ban
 
-#serverName = "localhost"
-serverName = "10.2.77.149"
+serverName = "localhost"
+#serverName = "10.2.77.149"
 serverPort = 4444
 
 # プレイヤー1の場合
@@ -158,7 +158,7 @@ def first_search(player, board):
             bd = copy.deepcopy(board)
             bd.move(i, x)
             if bd.isCatchedLion(player): return (bd, ban.Board.index2str[i], ban.Board.index2str[x])
-            searchList.append([bd, ban.Board.index2str[i], ban.Board.index2str[x]])
+            searchList.append(tuple([bd, ban.Board.index2str[i], ban.Board.index2str[x]]))
 
     if player == 1:
         for i in range(len(board.capturedPiece1)):
@@ -167,7 +167,7 @@ def first_search(player, board):
                 
                 bd = copy.deepcopy(board)
                 bd.c_move(i, board.capturedPiece1[i], j)
-                searchList.append([bd, "D"+str(i+1), ban.Board.index2str[j]])
+                searchList.append(tuple([bd, "D"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
@@ -181,7 +181,7 @@ def first_search(player, board):
 
             if s_result == 5000:
                 winFlag = True
-                nextMoveList.append(tuple(bd))
+                nextMoveList.append(bd)
 
             if s_result == val:
                 if random.randint(1, 2) == 1:
@@ -200,7 +200,7 @@ def first_search(player, board):
                 
                 bd = copy.deepcopy(board)
                 bd.c_move(i, board.capturedPiece2[i], j)
-                searchList.append([bd, "E"+str(i+1), ban.Board.index2str[j]])
+                searchList.append(tuple([bd, "E"+str(i+1), ban.Board.index2str[j]]))
 
         for bd in searchList:
             if (len(bd[0].capturedPiece1)+len(bd[0].capturedPiece2)) >= 5:
@@ -214,7 +214,7 @@ def first_search(player, board):
 
             if s_result == -5000:
                 winFlag = True
-                nextMoveList.append(tuple(bd))
+                nextMoveList.append(bd)
 
             if s_result == val:
                 if random.randint(1, 2) == 1:
@@ -234,7 +234,7 @@ def first_search(player, board):
     if winFlag:
         return random.choice(nextMoveList)
     
-    return tuple(ret_board)
+    return ret_board
 
 def isMatchBoard(b1, b2):
     for i in range(12):

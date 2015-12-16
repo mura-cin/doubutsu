@@ -33,47 +33,31 @@ class Board:
         self.capturedPiece2 = []  # プレイヤー2の持ち駒
         # (使ったメソッド, 動かす前のインデックス, 動かした先のインデックス, 動かす前の駒, 動かした先の駒)
         self.moveHistory = collections.deque() # 指し手の履歴
+        self.pieces = {}
+        self.pieces["c1"] = koma.Chick(1)
+        self.pieces["c2"] = koma.Chick(2)
+        self.pieces["h1"] = koma.Hen(1)
+        self.pieces["h2"] = koma.Hen(2)
+        self.pieces["e1"] = koma.Elephant(1)
+        self.pieces["e2"] = koma.Elephant(2)
+        self.pieces["g1"] = koma.Giraffe(1)
+        self.pieces["g2"] = koma.Giraffe(2)
+        self.pieces["l1"] = koma.Lion(1)
+        self.pieces["l2"] = koma.Lion(2)
 
         for i in range(12):
             c, k = bd[i].split(" ")
-            if k[0] == 'c':
-                self.board.append(koma.Chick(int(k[1])))
-            elif k[0] == 'h':
-                self.board.append(koma.Hen(int(k[1])))
-            elif k[0] == 'e':
-                self.board.append(koma.Elephant(int(k[1])))
-            elif k[0] == 'g':
-                self.board.append(koma.Giraffe(int(k[1])))
-            elif k[0] == 'l':
-                self.board.append(koma.Lion(int(k[1])))
-            else:  # 何もない
+            if k == "--":
                 self.board.append(None)
+            else:
+                self.board.append(self.pieces[k])
 
         for x in bd:
             c, k = x.split(" ")
             if c[0] == 'D':
-                if k[0] == 'c':
-                    self.capturedPiece1.append(koma.Chick(1))
-                elif k[0] == 'h':
-                    self.capturedPiece1.append(koma.Hen(1))
-                elif k[0] == 'e':
-                    self.capturedPiece1.append(koma.Elephant(1))
-                elif k[0] == 'g':
-                    self.capturedPiece1.append(koma.Giraffe(1))
-                elif k[0] == 'l':
-                    self.capturedPiece1.append(koma.Lion(1))
-
+                self.capturedPiece1.append(self.pieces[k])
             elif c[0] == 'E':
-                if k[0] == 'c':
-                    self.capturedPiece2.append(koma.Chick(2))
-                elif k[0] == 'h':
-                    self.capturedPiece2.append(koma.Hen(2))
-                elif k[0] == 'e':
-                    self.capturedPiece2.append(koma.Elephant(2))
-                elif k[0] == 'g':
-                    self.capturedPiece2.append(koma.Giraffe(2))
-                elif k[0] == 'l':
-                    self.capturedPiece2.append(koma.Lion(2))
+                self.capturedPiece2.append(self.pieces[k])
 
 
     # 動ける場所のインデックスのリストを返す
@@ -127,13 +111,13 @@ class Board:
             if self.board[si].player == 1:
                 # 取る駒がニワトリの時
                 if isinstance(self.board[di], koma.Hen):
-                    self.capturedPiece1.append(koma.Chick(1))
+                    self.capturedPiece1.append(self.pieces["c1"])
                 else:
                     self.capturedPiece1.append(copy.copy(self.board[di]))
                     self.capturedPiece1[-1].player = 1
             else:
                 if isinstance(self.board[di], koma.Hen):
-                    self.capturedPiece2.append(koma.Chick(2))
+                    self.capturedPiece2.append(self.pieces["c2"])
                 else:
                     self.capturedPiece2.append(copy.copy(self.board[di]))
                     self.capturedPiece2[-1].player = 2
@@ -141,12 +125,12 @@ class Board:
         # 駒を動かす時
         if self.board[si].player == 1:
             if isinstance(self.board[si], koma.Chick) and 0 <= di <= 2:
-                self.board[di] = koma.Hen(1)
+                self.board[di] = self.pieces["h1"]
             else:
                 self.board[di] = copy.copy(self.board[si])
         else:
             if isinstance(self.board[si], koma.Chick) and 9 <= di <= 11:
-                self.board[di] = koma.Hen(2)
+                self.board[di] = self.pieces["h2"]
             else:
                 self.board[di] = copy.copy(self.board[si])
 

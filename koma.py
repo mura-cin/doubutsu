@@ -3,6 +3,7 @@ class Piece:
 
     def __init__(self, player):
         self.player = player
+        self._VAL = 0
 
     def retValue(self):
         raise NotImplementedError
@@ -15,13 +16,12 @@ class Piece:
         
 class Chick(Piece):
 
-    VAL = 8
-
     def __init__(self, player):
         super(Chick, self).__init__(player)
+        self._VAL = 8
 
     def retValue(self):
-        return Chick.VAL
+        return self._VAL
 
     def getNextMove(self):
         if self.player == 1:
@@ -57,13 +57,12 @@ class Chick(Piece):
 
 class Hen(Piece):
 
-    VAL = 40
-
     def __init__(self, player):
         super(Hen, self).__init__(player)
+        self._VAL = 80
 
     def retValue(self):
-        return Hen.VAL
+        return self._VAL
 
     def getNextMove(self):
         if self.player == 1:
@@ -113,10 +112,9 @@ class Hen(Piece):
 
 class Elephant(Piece):
 
-    VAL = 30
-
     def __init__(self, player):
         super(Elephant, self).__init__(player)
+        self._VAL = 25
         self.nextMove = (
             (4,),
             (3,5,),
@@ -133,7 +131,7 @@ class Elephant(Piece):
         )
 
     def retValue(self):
-        return Elephant.VAL
+        return self._VAL
 
     def getNextMove(self):
         return self.nextMove
@@ -153,10 +151,9 @@ class Elephant(Piece):
 
 class Giraffe(Piece):
 
-    VAL = 30
-
     def __init__(self, player):
         super(Giraffe, self).__init__(player)
+        self._VAL = 30
         self.nextMove = (
             (3,1,),
             (0,4,2,),
@@ -173,7 +170,7 @@ class Giraffe(Piece):
         )
 
     def retValue(self):
-        return Giraffe.VAL
+        return self._VAL
 
     def getNextMove(self):
         return self.nextMove
@@ -192,10 +189,9 @@ class Giraffe(Piece):
 
 class Lion(Piece):
 
-    VAL = 1500
-
     def __init__(self, player):
         super(Lion, self).__init__(player)
+        self._VAL = 1500
         self.nextMove = (
             (3,1,4,),
             (0,3,4,2,5,),
@@ -212,7 +208,7 @@ class Lion(Piece):
         )
 
     def retValue(self):
-        return Lion.VAL
+        return self._VAL
 
     def getNextMove(self):
         return self.nextMove
