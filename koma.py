@@ -114,7 +114,7 @@ class Elephant(Piece):
 
     def __init__(self, player):
         super(Elephant, self).__init__(player)
-        self._VAL = 25
+        self._VAL = 30
         self.nextMove = (
             (4,),
             (3,5,),

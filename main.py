@@ -123,14 +123,14 @@ def alpha_beta2(turn, board, depth, alpha, beta):
         for i in range(len(board.capturedPiece1)):
             for j in range(12):
                 if board.board[j] is not None: continue
-                    
+
                 board.c_move(i, board.capturedPiece1[i], j)
                 alpha = max(alpha, alpha_beta2(not turn, board, depth-1, alpha, beta))
                 board.restore_move()
                 if alpha >= beta: return beta
                     
         return alpha
-        
+      
 
 
 def first_search(player, board):
@@ -186,7 +186,7 @@ def first_search(player, board):
             if s_result == val:
                 if random.randint(1, 2) == 1:
                     ret_board = bd
-                    print(ret_board)
+                    print(ret_board)                    
             if s_result > val:
                 val = s_result
                 ret_board = bd

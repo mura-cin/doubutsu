@@ -33,17 +33,18 @@ class Board:
         self.capturedPiece2 = []  # プレイヤー2の持ち駒
         # (使ったメソッド, 動かす前のインデックス, 動かした先のインデックス, 動かす前の駒, 動かした先の駒)
         self.moveHistory = collections.deque() # 指し手の履歴
-        self.pieces = {}
-        self.pieces["c1"] = koma.Chick(1)
-        self.pieces["c2"] = koma.Chick(2)
-        self.pieces["h1"] = koma.Hen(1)
-        self.pieces["h2"] = koma.Hen(2)
-        self.pieces["e1"] = koma.Elephant(1)
-        self.pieces["e2"] = koma.Elephant(2)
-        self.pieces["g1"] = koma.Giraffe(1)
-        self.pieces["g2"] = koma.Giraffe(2)
-        self.pieces["l1"] = koma.Lion(1)
-        self.pieces["l2"] = koma.Lion(2)
+        self.pieces = {
+            "c1" : koma.Chick(1),
+            "c2" : koma.Chick(2),
+            "h1" : koma.Hen(1),
+            "h2" : koma.Hen(2),
+            "e1" : koma.Elephant(1),
+            "e2" : koma.Elephant(2),
+            "g1" : koma.Giraffe(1),
+            "g2" : koma.Giraffe(2),
+            "l1" : koma.Lion(1),
+            "l2" : koma.Lion(2),
+        }
 
         for i in range(12):
             c, k = bd[i].split(" ")
@@ -109,19 +110,24 @@ class Board:
         # 駒を取る時
         if self.board[di] is not None:
             if self.board[si].player == 1:
-                # 取る駒がニワトリの時
-                if isinstance(self.board[di], koma.Hen):
+                if isinstance(self.board[di], koma.Elephant):
+                    self.capturedPiece1.append(self.pieces["e1"])
+                elif isinstance(self.board[di], koma.Giraffe):
+                    self.capturedPiece1.append(self.pieces["g1"])
+                elif isinstance(self.board[di], koma.Lion):
+                    self.capturedPiece1.append(self.pieces["l1"])
+                else:
                     self.capturedPiece1.append(self.pieces["c1"])
-                else:
-                    self.capturedPiece1.append(copy.copy(self.board[di]))
-                    self.capturedPiece1[-1].player = 1
             else:
-                if isinstance(self.board[di], koma.Hen):
-                    self.capturedPiece2.append(self.pieces["c2"])
+                if isinstance(self.board[di], koma.Elephant):
+                    self.capturedPiece2.append(self.pieces["e2"])
+                elif isinstance(self.board[di], koma.Giraffe):
+                    self.capturedPiece2.append(self.pieces["g2"])
+                elif isinstance(self.board[di], koma.Lion):
+                    self.capturedPiece2.append(self.pieces["l2"])
                 else:
-                    self.capturedPiece2.append(copy.copy(self.board[di]))
-                    self.capturedPiece2[-1].player = 2
-
+                    self.capturedPiece2.append(self.pieces["c2"])
+                    
         # 駒を動かす時
         if self.board[si].player == 1:
             if isinstance(self.board[si], koma.Chick) and 0 <= di <= 2:
@@ -207,9 +213,9 @@ class Board:
                     value -= len(self.movablePlace(i)) * 2
 
         for x in self.capturedPiece1:
-            value += x.retValue() + x.retValue()//2
+            value += x.retValue() + x.retValue()//4
         for x in self.capturedPiece2:
-            value -= x.retValue() + x.retValue()//2
+            value -= x.retValue() + x.retValue()//4
 
         return value
 
